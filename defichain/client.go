@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitcoin
+package defichain
 
 import (
 	"bytes"
@@ -24,18 +24,20 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
-	bitcoinUtils "github.com/coinbase/rosetta-bitcoin/utils"
+	"github.com/DeFiCh/rosetta-defichain/utils"
+	"github.com/shopspring/decimal"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/coinbase/rosetta-sdk-go/utils"
+	rosettaUtils "github.com/coinbase/rosetta-sdk-go/utils"
 )
 
 const (
 	// genesisBlockIndex is the height of the block we consider to be the
-	// genesis block of the bitcoin blockchain for polling
+	// genesis block of the DeFiChain blockchain for polling
 	genesisBlockIndex = 0
 
 	// requestID is the JSON-RPC request ID we use for making requests.
@@ -74,6 +76,12 @@ const (
 	// https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html
 	requestMethodSendRawTransaction requestMethod = "sendrawtransaction"
 
+	// https://developer.bitcoin.org/reference/rpc/getrawtransaction.html
+	requestMethodGetRawTransaction requestMethod = "getrawtransaction"
+
+	// https://developer.bitcoin.org/reference/rpc/gettransaction.html
+	requestMethodGetTransaction requestMethod = "gettransaction"
+
 	// https://developer.bitcoin.org/reference/rpc/estimatesmartfee.html
 	requestMethodEstimateSmartFee requestMethod = "estimatesmartfee"
 
@@ -89,11 +97,11 @@ const (
 	dialTimeout    = 5 * time.Second
 
 	// timeMultiplier is used to multiply the time
-	// returned in Bitcoin blocks to be milliseconds.
+	// returned in DeFiChain blocks to be milliseconds.
 	timeMultiplier = 1000
 
-	// rpc credentials are fixed in rosetta-bitcoin
-	// because we never expose access to the raw bitcoind
+	// rpc credentials are fixed in rosetta-defichain
+	// because we never expose access to the raw defid
 	// endpoints (that could be used perform an attack, like
 	// changing our peers).
 	rpcUsername = "rosetta"
@@ -109,10 +117,10 @@ var (
 	ErrJSONRPCError = errors.New("JSON-RPC error")
 )
 
-// Client is used to fetch blocks from bitcoind and
-// to parse Bitcoin block data into Rosetta types.
+// Client is used to fetch blocks from defid and
+// to parse DeFiChain block data into Rosetta types.
 //
-// We opted not to use existing Bitcoin RPC libraries
+// We opted not to use existing DeFiChain RPC libraries
 // because they don't allow providing context
 // in each request.
 type Client struct {
@@ -130,7 +138,7 @@ func LocalhostURL(rpcPort int) string {
 	return fmt.Sprintf("http://localhost:%d", rpcPort)
 }
 
-// NewClient creates a new Bitcoin client.
+// NewClient creates a new DeFiChain client.
 func NewClient(
 	baseURL string,
 	genesisBlockIdentifier *types.BlockIdentifier,
@@ -160,8 +168,7 @@ func newHTTPClient(timeout time.Duration) *http.Client {
 	return httpClient
 }
 
-// NetworkStatus returns the *types.NetworkStatusResponse for
-// bitcoind.
+// NetworkStatus returns the *types.NetworkStatusResponse for defid.
 func (b *Client) NetworkStatus(ctx context.Context) (*types.NetworkStatusResponse, error) {
 	rawBlock, err := b.getBlock(ctx, nil)
 	if err != nil {
@@ -213,25 +220,51 @@ func (b *Client) GetPeers(ctx context.Context) ([]*types.Peer, error) {
 func (b *Client) GetRawBlock(
 	ctx context.Context,
 	identifier *types.PartialBlockIdentifier,
-) (*Block, []string, error) {
+) (_ *Block, coins []string, _ error) {
+
 	block, err := b.getBlock(ctx, identifier)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	coins := []string{}
-	blockTxHashes := []string{}
+	txHashes := make([]string, 0, len(block.Txs))
+	coins = []string{}
+
 	for txIndex, tx := range block.Txs {
-		blockTxHashes = append(blockTxHashes, tx.Hash)
+		txHashes = append(txHashes, tx.Hash)
+
 		for inputIndex, input := range tx.Inputs {
-			txHash, vout, ok := b.getInputTxHash(input, txIndex, inputIndex)
-			if !ok {
+			txHash, vout, isCoinbase := getInputTxHash(input, txIndex, inputIndex)
+			if isCoinbase {
 				continue
+			}
+
+			// In order to sync genesis block, which contains coinbase `stake` transactions,
+			// for Indexer properly, we add additional semi-valid outputs, to make ends meet
+			// (such as valid transaction hashe references according to UTXO model)
+			if block.Height == genesisBlockIndex {
+				tx0 := block.Txs[0]
+				vout = int64(len(tx0.Outputs))
+
+				// Represents semi-valid output for coinbase `stake` transaction input
+				newOut := *tx0.Outputs[0]
+
+				tx0.Outputs = append(tx0.Outputs, &newOut)
+				tx0.Outputs[vout].Index = vout
+				tx0.Outputs[vout].ScriptPubKey = new(ScriptPubKey)
+				tx0.Outputs[vout].Value, err = sumTxOutValues(tx.Outputs)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				txHash = tx0.Hash
+				input.TxHash = txHash
+				input.Vout = vout
 			}
 
 			// If any transactions spent in the same block they are created, don't include them
 			// in previousTxHashes to fetch.
-			if !utils.ContainsString(blockTxHashes, txHash) {
+			if !rosettaUtils.ContainsString(txHashes, txHash) {
 				coins = append(coins, CoinIdentifier(txHash, vout))
 			}
 		}
@@ -240,7 +273,23 @@ func (b *Client) GetRawBlock(
 	return block, coins, nil
 }
 
-// ParseBlock returns a parsed bitcoin block given a raw bitcoin
+func sumTxOutValues(outputs []*Output) (float64, error) {
+	var sum decimal.Decimal
+
+	for _, out := range outputs {
+		value := decimal.NewFromFloat(out.Value)
+		sum = sum.Add(value)
+	}
+
+	result, isExact := sum.Float64()
+	if !isExact {
+		return -1, errors.New("the result sum doesn't match calculated one exactly")
+	}
+
+	return result, nil
+}
+
+// ParseBlock returns a parsed DeFiChain block given a raw DeFiChain
 // block and a map of transactions containing inputs.
 func (b *Client) ParseBlock(
 	ctx context.Context,
@@ -262,8 +311,7 @@ func (b *Client) ParseBlock(
 	return rblock, nil
 }
 
-// SendRawTransaction submits a serialized transaction
-// to bitcoind.
+// SendRawTransaction submits a serialized transaction to defid.
 func (b *Client) SendRawTransaction(
 	ctx context.Context,
 	serializedTx string,
@@ -276,6 +324,54 @@ func (b *Client) SendRawTransaction(
 	response := &sendRawTransactionResponse{}
 	if err := b.post(ctx, requestMethodSendRawTransaction, params, response); err != nil {
 		return "", fmt.Errorf("%w: error submitting raw transaction", err)
+	}
+
+	return response.Result, nil
+}
+
+// GetRawTransaction returns the raw transaction data
+func (b *Client) GetRawTransaction(
+	ctx context.Context,
+	txid, blockhash string,
+) (*Transaction, error) {
+	// Parameters:
+	//   1. txid
+	//   2. verbose (returns object if true)
+	//   3. blockhash (looks in mempool only if not provided)
+	resp := &Transaction{}
+	params := []interface{}{txid, true}
+	if blockhash != "" {
+		params = append(params, blockhash)
+	}
+
+	response := &getRawTransactionResponse{}
+	if err := b.post(ctx, requestMethodGetRawTransaction, params, response); err != nil {
+		return nil, fmt.Errorf("%w: error getting raw transaction", err)
+	}
+
+	if err := response.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(response.Result, &resp); err != nil {
+		return nil, fmt.Errorf("%w: error unmarshaling raw transaction", err)
+	}
+
+	return resp, nil
+}
+
+// GetTransaction returns the data about in-wallet transaction
+func (b *Client) GetTransaction(
+	ctx context.Context,
+	txid string,
+) ([]byte, error) {
+	// Parameters:
+	//   1. txid
+	params := []interface{}{txid}
+
+	response := &getTransactionResponse{}
+	if err := b.post(ctx, requestMethodGetTransaction, params, response); err != nil {
+		return nil, fmt.Errorf("%w: error submitting raw transaction", err)
 	}
 
 	return response.Result, nil
@@ -494,7 +590,7 @@ func (b *Client) parseTransactions(
 	block *Block,
 	coins map[string]*types.AccountCoin,
 ) ([]*types.Transaction, error) {
-	logger := bitcoinUtils.ExtractLogger(ctx, "client")
+	logger := utils.ExtractLogger(ctx, "client")
 
 	if block == nil {
 		return nil, errors.New("error parsing nil block")
@@ -569,7 +665,7 @@ func (b *Client) parseTxOperations(
 	txOps := []*types.Operation{}
 
 	for networkIndex, input := range tx.Inputs {
-		if bitcoinIsCoinbaseInput(input, txIndex, networkIndex) {
+		if isCoinbaseInput(input, txIndex, networkIndex) {
 			txOp, err := b.coinbaseTxOperation(input, int64(len(txOps)), int64(networkIndex))
 			if err != nil {
 				return nil, err
@@ -627,7 +723,7 @@ func (b *Client) parseTxOperations(
 }
 
 // parseOutputTransactionOperation returns the types.Operation for the specified
-// `bitcoinOutput` transaction output.
+// `deFichainOutput` transaction output.
 func (b *Client) parseOutputTransactionOperation(
 	output *Output,
 	txHash string,
@@ -656,7 +752,7 @@ func (b *Client) parseOutputTransactionOperation(
 		CoinAction: types.CoinCreated,
 	}
 
-	// If we are unable to parse the output account (i.e. bitcoind
+	// If we are unable to parse the output account (i.e. defid
 	// returns a blank/nonstandard ScriptPubKey), we create an address as the
 	// concatenation of the tx hash and index.
 	//
@@ -693,23 +789,31 @@ func (b *Client) parseOutputTransactionOperation(
 // getInputTxHash returns the transaction hash corresponding to an inputs previous
 // output. If the input is a coinbase input, then no previous transaction is associated
 // with the input.
-func (b *Client) getInputTxHash(
+func getInputTxHash(
 	input *Input,
 	txIndex int,
 	inputIndex int,
-) (string, int64, bool) {
-	if bitcoinIsCoinbaseInput(input, txIndex, inputIndex) {
-		return "", -1, false
+) (txHash string, vout int64, isCoinbase bool) {
+
+	if isCoinbaseInput(input, txIndex, inputIndex) {
+		return "", -1, true
 	}
 
-	return input.TxHash, input.Vout, true
+	return input.TxHash, input.Vout, false
 }
 
-// bitcoinIsCoinbaseInput returns whether the specified input is
+// isCoinbaseInput returns whether the specified input is
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
-func bitcoinIsCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
-	return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+// But some coinbase transactions follows right after first transaction.
+func isCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
+	if txIndex == 0 {
+		return inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+	}
+	if inputIndex == 0 && input.TxHash == "" {
+		return strings.HasSuffix(input.Coinbase, "00")
+	}
+	return false
 }
 
 // parseInputTransactionOperation returns the types.Operation for the specified
@@ -767,7 +871,7 @@ func (b *Client) parseAmount(amount float64) (uint64, error) {
 	return uint64(atomicAmount), nil
 }
 
-// parseOutputAccount parses a bitcoinScriptPubKey and returns an account
+// parseOutputAccount parses a deFichainScriptPubKey and returns an account
 // identifier. The account identifier's address corresponds to the first
 // address encoded in the script.
 func (b *Client) parseOutputAccount(
@@ -803,7 +907,7 @@ func (b *Client) coinbaseTxOperation(
 	}, nil
 }
 
-// post makes a HTTP request to a Bitcoin node
+// post makes an HTTP request to a DeFiChain node
 func (b *Client) post(
 	ctx context.Context,
 	method requestMethod,

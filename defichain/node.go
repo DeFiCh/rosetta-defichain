@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitcoin
+package defichain
 
 import (
 	"bufio"
@@ -23,14 +23,14 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/coinbase/rosetta-bitcoin/utils"
+	"github.com/DeFiCh/rosetta-defichain/utils"
 
 	"golang.org/x/sync/errgroup"
 )
 
 const (
-	bitcoindLogger       = "bitcoind"
-	bitcoindStdErrLogger = "bitcoind stderr"
+	defidLogger       = "defid"
+	defidStdErrLogger = "defid stderr"
 )
 
 func logPipe(ctx context.Context, pipe io.ReadCloser, identifier string) error {
@@ -51,8 +51,8 @@ func logPipe(ctx context.Context, pipe io.ReadCloser, identifier string) error {
 			message = messages[1]
 		}
 
-		// Print debug log if from bitcoindLogger
-		if identifier == bitcoindLogger {
+		// Print debug log if from defidLogger
+		if identifier == defidLogger {
 			logger.Debugw(message)
 			continue
 		}
@@ -61,12 +61,12 @@ func logPipe(ctx context.Context, pipe io.ReadCloser, identifier string) error {
 	}
 }
 
-// StartBitcoind starts a bitcoind daemon in another goroutine
+// StartDefid starts a defid daemon in another goroutine
 // and logs the results to the console.
-func StartBitcoind(ctx context.Context, configPath string, g *errgroup.Group) error {
-	logger := utils.ExtractLogger(ctx, "bitcoind")
+func StartDefid(ctx context.Context, configPath string, g *errgroup.Group) error {
+	logger := utils.ExtractLogger(ctx, "defid")
 	cmd := exec.Command(
-		"/app/bitcoind",
+		"/app/defid",
 		fmt.Sprintf("--conf=%s", configPath),
 	) // #nosec G204
 
@@ -81,21 +81,21 @@ func StartBitcoind(ctx context.Context, configPath string, g *errgroup.Group) er
 	}
 
 	g.Go(func() error {
-		return logPipe(ctx, stdout, bitcoindLogger)
+		return logPipe(ctx, stdout, defidLogger)
 	})
 
 	g.Go(func() error {
-		return logPipe(ctx, stderr, bitcoindStdErrLogger)
+		return logPipe(ctx, stderr, defidStdErrLogger)
 	})
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("%w: unable to start bitcoind", err)
+		return fmt.Errorf("%w: unable to start defid", err)
 	}
 
 	g.Go(func() error {
 		<-ctx.Done()
 
-		logger.Warnw("sending interrupt to bitcoind")
+		logger.Warnw("sending interrupt to defid")
 		return cmd.Process.Signal(os.Interrupt)
 	})
 

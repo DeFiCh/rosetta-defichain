@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitcoin
+package defichain
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -23,24 +24,24 @@ import (
 )
 
 const (
-	// Blockchain is Bitcoin.
-	Blockchain string = "Bitcoin"
+	// Blockchain is DeFiChain.
+	Blockchain string = "defichain"
 
 	// MainnetNetwork is the value of the network
 	// in MainnetNetworkIdentifier.
-	MainnetNetwork string = "Mainnet"
+	MainnetNetwork string = "mainnet"
 
 	// TestnetNetwork is the value of the network
 	// in TestnetNetworkIdentifier.
-	TestnetNetwork string = "Testnet3"
+	TestnetNetwork string = "testnet"
 
 	// Decimals is the decimals value
 	// used in Currency.
 	Decimals = 8
 
-	// SatoshisInBitcoin is the number of
-	// Satoshis in 1 BTC (10^8).
-	SatoshisInBitcoin = 100000000
+	// SatoshisInDFI is the number of
+	// Satoshis in 1 DFI (10^8).
+	SatoshisInDFI = 100000000
 
 	// InputOpType is used to describe
 	// INPUT.
@@ -55,7 +56,7 @@ const (
 	CoinbaseOpType = "COINBASE"
 
 	// SuccessStatus is the status of all
-	// Bitcoin operations because anything
+	// DeFiChain operations because anything
 	// on-chain is considered successful.
 	SuccessStatus = "SUCCESS"
 
@@ -66,10 +67,10 @@ const (
 	SkippedStatus = "SKIPPED"
 
 	// TransactionHashLength is the length
-	// of any transaction hash in Bitcoin.
+	// of any transaction hash in DeFiChain.
 	TransactionHashLength = 64
 
-	// NullData is returned by bitcoind
+	// NullData is returned by defid
 	// as the ScriptPubKey.Type for OP_RETURN
 	// locking scripts.
 	NullData = "nulldata"
@@ -88,7 +89,8 @@ const (
 var (
 	// MainnetGenesisBlockIdentifier is the genesis block for mainnet.
 	MainnetGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash: "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+		// Hash: "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+		Hash: "279b1a87aedc7b9471d4ad4e5f12967ab6259926cd097ade188dfcf22ebfe72a",
 	}
 
 	// MainnetParams are the params for mainnet.
@@ -96,7 +98,7 @@ var (
 
 	// MainnetCurrency is the *types.Currency for mainnet.
 	MainnetCurrency = &types.Currency{
-		Symbol:   "BTC",
+		Symbol:   "DFI",
 		Decimals: Decimals,
 	}
 
@@ -110,7 +112,7 @@ var (
 
 	// TestnetCurrency is the *types.Currency for testnet.
 	TestnetCurrency = &types.Currency{
-		Symbol:   "tBTC",
+		Symbol:   "tDFI",
 		Decimals: Decimals,
 	}
 
@@ -135,7 +137,7 @@ var (
 )
 
 // ScriptPubKey is a script placed on the output operations
-// of a Bitcoin transaction that must be satisfied to spend
+// of a DeFiChain transaction that must be satisfied to spend
 // the output.
 type ScriptPubKey struct {
 	ASM          string   `json:"asm"`
@@ -146,14 +148,14 @@ type ScriptPubKey struct {
 }
 
 // ScriptSig is a script on the input operations of a
-// Bitcoin transaction that satisfies the ScriptPubKey
+// DeFiChain transaction that satisfies the ScriptPubKey
 // on an output being spent.
 type ScriptSig struct {
 	ASM string `json:"asm"`
 	Hex string `json:"hex"`
 }
 
-// BlockchainInfo is information about the Bitcoin network.
+// BlockchainInfo is information about the DeFiChain network.
 // This struct only contains the information necessary for
 // this implementation.
 type BlockchainInfo struct {
@@ -176,7 +178,7 @@ type PeerInfo struct {
 	SyncedHeaders  int64  `json:"synced_headers"`
 }
 
-// Block is a raw Bitcoin block (with verbosity == 2).
+// Block is a raw DeFiChain block (with verbosity == 2).
 type Block struct {
 	Hash              string  `json:"hash"`
 	Height            int64   `json:"height"`
@@ -223,7 +225,7 @@ type BlockMetadata struct {
 	Difficulty float64 `json:"difficulty,omitempty"`
 }
 
-// Transaction is a raw Bitcoin transaction.
+// Transaction is a raw DeFiChain transaction.
 type Transaction struct {
 	Hex      string `json:"hex"`
 	Hash     string `json:"txid"`
@@ -260,7 +262,7 @@ type TransactionMetadata struct {
 	Weight   int64 `json:"weight,omitempty"`
 }
 
-// Input is a raw input in a Bitcoin transaction.
+// Input is a raw input in a DeFiChain transaction.
 type Input struct {
 	TxHash      string     `json:"txid"`
 	Vout        int64      `json:"vout"`
@@ -284,7 +286,7 @@ func (i Input) Metadata() (map[string]interface{}, error) {
 	return types.MarshalMap(m)
 }
 
-// Output is a raw output in a Bitcoin transaction.
+// Output is a raw output in a DeFiChain transaction.
 type Output struct {
 	Value        float64       `json:"value"`
 	Index        int64         `json:"n"`
@@ -301,7 +303,7 @@ func (o Output) Metadata() (map[string]interface{}, error) {
 }
 
 // OperationMetadata is a collection of useful
-// metadata from Bitcoin inputs and outputs.
+// metadata from DeFiChain inputs and outputs.
 type OperationMetadata struct {
 	// Coinbase Metadata
 	Coinbase string `json:"coinbase,omitempty"`
@@ -455,6 +457,44 @@ func (s sendRawTransactionResponse) Err() error {
 	)
 }
 
+// getRawTransactionResponse is the response body for `getrawtransaction` requests
+type getRawTransactionResponse struct {
+	Result json.RawMessage `json:"result"`
+	Error  *responseError  `json:"error"`
+}
+
+func (s getRawTransactionResponse) Err() error {
+	if s.Error == nil {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"%w: error JSON RPC response, code: %d, message: %s",
+		ErrJSONRPCError,
+		s.Error.Code,
+		s.Error.Message,
+	)
+}
+
+// getTransactionResponse is the response body for `gettransaction` requests
+type getTransactionResponse struct {
+	Result []byte         `json:"result"`
+	Error  *responseError `json:"error"`
+}
+
+func (s getTransactionResponse) Err() error {
+	if s.Error == nil {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"%w: error JSON RPC response, code: %d, message: %s",
+		ErrJSONRPCError,
+		s.Error.Code,
+		s.Error.Message,
+	)
+}
+
 type suggestedFeeRate struct {
 	FeeRate float64 `json:"feerate"`
 }
@@ -499,7 +539,7 @@ func (r rawMempoolResponse) Err() error {
 
 // CoinIdentifier converts a tx hash and vout into
 // the canonical CoinIdentifier.Identifier used in
-// rosetta-bitcoin.
+// rosetta-defichain.
 func CoinIdentifier(hash string, vout int64) string {
 	return fmt.Sprintf("%s:%d", hash, vout)
 }

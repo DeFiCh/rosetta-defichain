@@ -1,29 +1,55 @@
 {
   "network": {
-    "blockchain": "Bitcoin",
-    "network": "Testnet3"
+    "blockchain": "defichain",
+    "network": "testnet"
   },
-  "data_directory": "cli-data",
-  "http_timeout": 300,
-  "max_retries": 5,
-  "max_online_connections": 1000,
-  "tip_delay": 1800,
+  "online_url": "http://localhost:8080",
+  "http_timeout": 10,
+  "seen_block_workers": 30,
+  "serial_block_workers": 30,
+  "max_sync_concurrency": 30,
+  "max_online_connections": 30,
+  "max_retries": 10,
   "memory_limit_disabled": true,
   "compression_disabled": true,
-  "construction": {
-    "constructor_dsl_file": "bitcoin.ros",
-    "end_conditions": {
-      "create_account": 10,
-      "transfer": 10
-    }
-  },
+  "tip_delay": 1800,
+  "data_directory": "./cli-data",
+
   "data": {
-    "initial_balance_fetch_disabled": true,
     "end_conditions": {
+      "tip": true,
       "reconciliation_coverage": {
         "coverage": 0.95,
-        "from_tip": true
+        "from_tip": true,
+        "tip": true
       }
     }
+  },
+
+  "construction": {
+    "offline_url": "http://localhost:8080",
+    "max_offline_connections": 1,
+    "stale_depth": 15,
+    "broadcast_limit": 10,
+    "constructor_dsl_file": "construction_api.ros",
+    "block_broadcast_limit": 1,
+    "rebroadcast_all": true,
+    "end_conditions": {
+      "transfer": 10
+    },
+    "prefunded_accounts": [
+      {
+        "privkey": "TODO: FILL WITH SERIALIZED BYTES HEX",
+        "account_identifier": {
+          "address": "TODO: FILL WITH P2WPKH"
+        },
+        "curve_type": "secp256k1",
+        "currency": {
+          "symbol": "tDFI",
+          "decimals": 8,
+          "metadata": {}
+        }
+      }
+    ]
   }
 }

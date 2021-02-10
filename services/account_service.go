@@ -17,7 +17,7 @@ package services
 import (
 	"context"
 
-	"github.com/coinbase/rosetta-bitcoin/configuration"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
 
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -49,8 +49,6 @@ func (s *AccountAPIService) AccountBalance(
 		return nil, wrapErr(ErrUnavailableOffline, nil)
 	}
 
-	// TODO: filter balances by request currencies
-
 	// If we are fetching a historical balance,
 	// use balance storage and don't return coins.
 	amount, block, err := s.i.GetBalance(
@@ -79,12 +77,6 @@ func (s *AccountAPIService) AccountCoins(
 	if s.config.Mode != configuration.Online {
 		return nil, wrapErr(ErrUnavailableOffline, nil)
 	}
-
-	// TODO: filter coins by request currencies
-
-	// TODO: support include_mempool query
-	// https://github.com/coinbase/rosetta-bitcoin/issues/36#issuecomment-724992022
-	// Once mempoolcoins are supported also change the bool service/types.go:MempoolCoins to true
 
 	coins, block, err := s.i.GetCoins(ctx, request.AccountIdentifier)
 	if err != nil {
