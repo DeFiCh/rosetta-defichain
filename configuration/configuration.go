@@ -41,17 +41,17 @@ const (
 	// to make outbound connections.
 	Offline Mode = "OFFLINE"
 
-	// Mainnet is the DeFichain Mainnet.
+	// Mainnet is the DeFiChain Mainnet.
 	Mainnet string = "MAINNET"
 
-	// Testnet is the DeFichain Testnet.
+	// Testnet is the DeFiChain Testnet.
 	Testnet string = "TESTNET"
 
-	// mainnetConfigPath is the path of the DeFichain
+	// mainnetConfigPath is the path of the DeFiChain
 	// configuration file for mainnet.
 	mainnetConfigPath = "/app/defichain-mainnet.conf"
 
-	// testnetConfigPath is the path of the DeFichain
+	// testnetConfigPath is the path of the DeFiChain
 	// configuration file for testnet.
 	testnetConfigPath = "/app/defichain-testnet.conf"
 

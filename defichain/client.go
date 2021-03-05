@@ -35,7 +35,7 @@ import (
 
 const (
 	// genesisBlockIndex is the height of the block we consider to be the
-	// genesis block of the DeFichain blockchain for polling
+	// genesis block of the DeFiChain blockchain for polling
 	genesisBlockIndex = 0
 
 	// requestID is the JSON-RPC request ID we use for making requests.
@@ -96,7 +96,7 @@ const (
 	dialTimeout    = 5 * time.Second
 
 	// timeMultiplier is used to multiply the time
-	// returned in DeFichain blocks to be milliseconds.
+	// returned in DeFiChain blocks to be milliseconds.
 	timeMultiplier = 1000
 
 	// rpc credentials are fixed in rosetta-defichain
@@ -117,9 +117,9 @@ var (
 )
 
 // Client is used to fetch blocks from defid and
-// to parse DeFichain block data into Rosetta types.
+// to parse DeFiChain block data into Rosetta types.
 //
-// We opted not to use existing DeFichain RPC libraries
+// We opted not to use existing DeFiChain RPC libraries
 // because they don't allow providing context
 // in each request.
 type Client struct {
@@ -137,7 +137,7 @@ func LocalhostURL(rpcPort int) string {
 	return fmt.Sprintf("http://localhost:%d", rpcPort)
 }
 
-// NewClient creates a new DeFichain client.
+// NewClient creates a new DeFiChain client.
 func NewClient(
 	baseURL string,
 	genesisBlockIdentifier *types.BlockIdentifier,
@@ -246,7 +246,7 @@ func (b *Client) GetRawBlock(
 	return block, coins, nil
 }
 
-// ParseBlock returns a parsed DeFichain block given a raw DeFichain
+// ParseBlock returns a parsed DeFiChain block given a raw DeFiChain
 // block and a map of transactions containing inputs.
 func (b *Client) ParseBlock(
 	ctx context.Context,
@@ -858,7 +858,7 @@ func (b *Client) coinbaseTxOperation(
 	}, nil
 }
 
-// post makes an HTTP request to a DeFichain node
+// post makes an HTTP request to a DeFiChain node
 func (b *Client) post(
 	ctx context.Context,
 	method requestMethod,

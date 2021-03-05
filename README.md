@@ -4,7 +4,7 @@
   </a>
 </p>
 <h3 align="center">
-   Rosetta DeFichain
+   Rosetta DeFiChain
 </h3>
 <p align="center">
   <a href="https://circleci.com/gh/coinbase/rosetta-bitcoin/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-bitcoin/tree/master.svg?style=shield" /></a>
@@ -21,7 +21,7 @@ USE AT YOUR OWN RISK! COINBASE ASSUMES NO RESPONSIBILITY NOR LIABILITY IF THERE 
 
 ## Overview
 `rosetta-defichain` provides a reference implementation of the Rosetta API for
-DeFichain in Golang. If you haven't heard of the Rosetta API, you can find more
+DeFiChain in Golang. If you haven't heard of the Rosetta API, you can find more
 information [here](https://rosetta-api.org).
 
 ## Features
@@ -116,7 +116,7 @@ on your OS. There is a great tutorial for how to do this on Linux [here](https:/
 ## Architecture
 `rosetta-defichain` uses the `syncer`, `storage`, `parser`, and `server` package
 from [`rosetta-sdk-go`](https://github.com/coinbase/rosetta-sdk-go) instead
-of a new DeFichain-specific implementation of packages of similar functionality. Below
+of a new DeFiChain-specific implementation of packages of similar functionality. Below
 you can find a high-level overview of how everything fits together:
 ```text
                                +------------------------------------------------------------------+
