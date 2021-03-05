@@ -5,7 +5,7 @@ package indexer
 import (
 	context "context"
 
-	defichain "github.com/coinbase/rosetta-defichain/defichain"
+	defichain "github.com/DeFiCh/rosetta-defichain/defichain"
 
 	mock "github.com/stretchr/testify/mock"
 

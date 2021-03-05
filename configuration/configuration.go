@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/DeFiCh/rosetta-defichain/defichain"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/coinbase/rosetta-defichain/defichain"
 	"github.com/coinbase/rosetta-sdk-go/storage/encoder"
 	"github.com/coinbase/rosetta-sdk-go/types"
 )

@@ -22,10 +22,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
-	"github.com/coinbase/rosetta-defichain/defichain"
-	"github.com/coinbase/rosetta-defichain/services"
-	"github.com/coinbase/rosetta-defichain/utils"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
+	"github.com/DeFiCh/rosetta-defichain/services"
+	"github.com/DeFiCh/rosetta-defichain/utils"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/storage/database"

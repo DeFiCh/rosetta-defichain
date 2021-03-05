@@ -20,7 +20,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/coinbase/rosetta-defichain/defichain"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
 	"github.com/coinbase/rosetta-sdk-go/storage/encoder"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/coinbase/rosetta-sdk-go/utils"

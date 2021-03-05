@@ -18,7 +18,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
 
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"

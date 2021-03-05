@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
-	mocks "github.com/coinbase/rosetta-defichain/mocks/services"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
+	mocks "github.com/DeFiCh/rosetta-defichain/mocks/services"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/stretchr/testify/assert"

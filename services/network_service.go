@@ -17,8 +17,8 @@ package services
 import (
 	"context"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
-	"github.com/coinbase/rosetta-defichain/defichain"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
 
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"

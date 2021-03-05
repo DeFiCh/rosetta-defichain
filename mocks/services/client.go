@@ -5,7 +5,7 @@ package services
 import (
 	context "context"
 
-	defichain "github.com/coinbase/rosetta-defichain/defichain"
+	defichain "github.com/DeFiCh/rosetta-defichain/defichain"
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/coinbase/rosetta-sdk-go/types"

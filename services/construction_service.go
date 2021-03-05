@@ -24,8 +24,8 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
-	"github.com/coinbase/rosetta-defichain/defichain"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/txscript"

@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinbase/rosetta-defichain/configuration"
-	"github.com/coinbase/rosetta-defichain/defichain"
-	mocks "github.com/coinbase/rosetta-defichain/mocks/indexer"
+	"github.com/DeFiCh/rosetta-defichain/configuration"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
+	mocks "github.com/DeFiCh/rosetta-defichain/mocks/indexer"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/coinbase/rosetta-sdk-go/utils"
