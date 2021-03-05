@@ -43,7 +43,7 @@ Running the following commands will create a Docker image called `rosetta-defich
 #### From GitHub
 To download the pre-built Docker image from the latest release, run:
 ```text
-curl -sSfL https://raw.githubusercontent.com/coinbase/rosetta-defichain/master/install.sh | sh -s
+curl -sSfL https://raw.githubusercontent.com/DeFiCh/rosetta-defichain/master/install.sh | sh -s
 ```
 _Do not try to install rosetta-defichain using GitHub Packages!_
 
