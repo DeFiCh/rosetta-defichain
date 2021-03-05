@@ -212,7 +212,7 @@ and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json`
 
 ## Future Work
-* Publish benchamrks for sync speed, storage usage, and load testing
+* Publish benchmarks for sync speed, storage usage, and load testing
 * [Rosetta API `/mempool/transaction`](https://www.rosetta-api.org/docs/MempoolApi.html#mempooltransaction) implementation
 * Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
 * Add performance mode to use unlimited RAM (implementation currently optimized to use <= 16 GB of RAM)
