@@ -764,7 +764,19 @@ func (b *Client) getInputTxHash(
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
 func deFichainIsCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
-	return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+	// TODO: discuss and accept a decision
+	//
+	// Some transactions has several coinbase inputs - txIndex != 0 && input.Coinbase == "".
+	// This behaviour leads to an infinite loop at indexer.go:558... because syncer entity
+	// thinks, that there're must be previous transactions, but they're not and never be
+	//
+	// ? Is it normal behaviour for blockchain. Mentioned case above was tested on testnet only
+
+	// ! TODO: do revision. See TODO on the 767 line
+	// * Old variant
+	// return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+	// * New temprorary variant
+	return inputIndex == 0 && input.TxHash == ""
 }
 
 // parseInputTransactionOperation returns the types.Operation for the specified
