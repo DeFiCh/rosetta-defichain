@@ -624,7 +624,7 @@ func (b *Client) parseTxOperations(
 	txOps := []*types.Operation{}
 
 	for networkIndex, input := range tx.Inputs {
-		if deFichainIsCoinbaseInput(input, txIndex, networkIndex) {
+		if isCoinbaseInput(input, txIndex, networkIndex) {
 			txOp, err := b.coinbaseTxOperation(input, int64(len(txOps)), int64(networkIndex))
 			if err != nil {
 				return nil, err
@@ -753,17 +753,17 @@ func (b *Client) getInputTxHash(
 	txIndex int,
 	inputIndex int,
 ) (string, int64, bool) {
-	if deFichainIsCoinbaseInput(input, txIndex, inputIndex) {
+	if isCoinbaseInput(input, txIndex, inputIndex) {
 		return "", -1, false
 	}
 
 	return input.TxHash, input.Vout, true
 }
 
-// deFichainIsCoinbaseInput returns whether the specified input is
+// isCoinbaseInput returns whether the specified input is
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
-func deFichainIsCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
+func isCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
 	// TODO: discuss and accept a decision
 	//
 	// Some transactions has several coinbase inputs - txIndex != 0 && input.Coinbase == "".
