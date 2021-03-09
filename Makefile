@@ -88,3 +88,23 @@ mocks:
 	mockery --dir indexer --all --case underscore --outpkg indexer --output mocks/indexer;
 	mockery --dir services --all --case underscore --outpkg services --output mocks/services;
 	${ADDLICENCE_SCRIPT} .;
+
+# NOTE: may be provided as an environment variable
+CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
+
+# Possible configuration parameters:
+# ----------------------------------
+# GENERAL:
+# - https://pkg.go.dev/github.com/coinbase/rosetta-cli/configuration#Configuration
+# 
+# DATA:
+# - https://pkg.go.dev/github.com/coinbase/rosetta-cli/configuration#DataConfiguration
+# 
+# CONSTRUCTION:
+# - https://pkg.go.dev/github.com/coinbase/rosetta-cli/configuration#ConstructionConfiguration
+
+test-testnet-rosetta-specification: check-testnet-rosetta-cli-configuration
+	rosetta-cli check:data --configuration-file ${CLI_TESTNET_CONFIG_PATH}
+
+check-testnet-rosetta-cli-configuration:
+	rosetta-cli configuration:validate ${CLI_TESTNET_CONFIG_PATH}
