@@ -61,15 +61,15 @@ var (
 	// yet ready to serve queries.
 	ErrNotReady = &types.Error{
 		Code:      2, //nolint
-		Message:   "Defid is not ready",
-		Retriable: true,
+		Message:   "Instance of defid is not ready",
+		Retriable: false,
 	}
 
 	// ErrDefid is returned when defid
 	// errors on a request.
 	ErrDefid = &types.Error{
 		Code:    3, //nolint
-		Message: "Defid error",
+		Message: "Instance of defid error",
 	}
 
 	// ErrBlockNotFound is returned when a block
