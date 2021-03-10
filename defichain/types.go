@@ -112,7 +112,7 @@ var (
 
 	// TestnetCurrency is the *types.Currency for testnet.
 	TestnetCurrency = &types.Currency{
-		Symbol:   "tBTC",
+		Symbol:   "tDFI",
 		Decimals: Decimals,
 	}
 
