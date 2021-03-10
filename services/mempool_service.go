@@ -16,7 +16,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/DeFiCh/rosetta-defichain/configuration"
 
@@ -86,8 +85,6 @@ func (s *MempoolAPIService) MempoolTransaction(
 		// if err != nil || tx == nil {
 		return nil, wrapErr(ErrTransactionNotFound, nil)
 	}
-	// FIXME: delete
-	fmt.Printf("/mempool/transaction tx: %v", tx)
 
 	resp := &types.MempoolTransactionResponse{
 		Transaction: &types.Transaction{
@@ -95,9 +92,6 @@ func (s *MempoolAPIService) MempoolTransaction(
 				Hash: tx.Hash,
 			},
 		},
-
-		// Transaction: tx,
 	}
-
 	return resp, nil
 }
