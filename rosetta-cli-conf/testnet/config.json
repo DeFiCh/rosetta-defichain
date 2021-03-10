@@ -16,5 +16,16 @@
     "end_conditions": {
       "index": 1000
     }
+  },
+
+  "construction": {
+    "offline_url": "http://localhost:8080",
+    "max_offline_connections": 1,
+    "stale_depth": 2,
+    "broadcast_limit": 2,
+    "constructor_dsl_file": "defichain.ros",
+    "end_conditions": {
+      "request_funds": 1
+    }
   }
 }
