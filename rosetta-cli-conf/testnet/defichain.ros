@@ -1,6 +1,11 @@
+// RequestFunds is where the user funds an account. This flow
+// is invoked when there are no pending broadcasts and it is not possible
+// to make progress on any Flows or start new ones. RequestFunds
+// must be executed with a concurrency of 1.
+//
 request_funds(1){
   find_account{
-    currency = {"symbol":"tBTC", "decimals":8};
+    currency = {"symbol":"tDFI", "decimals":8};
     random_account = find_balance({
       "minimum_balance":{
         "value": "0",
@@ -8,6 +13,8 @@ request_funds(1){
       },
       "create_limit":1
     });
+
+    print_message({"random_account": {{random_account}}});
   },
 
   // Create a separate scenario to request funds so that
@@ -25,10 +32,17 @@ request_funds(1){
   }
 }
 
+
+// CreateAccount is where another account (already with funds)
+// creates a new account. It is possible to configure how many
+// accounts should be created. CreateAccount must be executed
+// with a concurrency of 1.
+//
 create_account(1){
   create{
-    network = {"network":"Testnet3", "blockchain":"defichain"};
-    key = generate_key({"curve_type": "secp256k1"});
+    network = {"network":"testnet", "blockchain":"defichain"};
+    key     = generate_key({"curve_type": "secp256k1"});
+    
     account = derive({
       "network_identifier": {{network}},
       "public_key": {{key.public_key}}
@@ -44,8 +58,8 @@ create_account(1){
 
 transfer(10){
   transfer_dry_run{
-    transfer_dry_run.network = {"network":"Testnet3", "blockchain":"defichain"};
-    currency = {"symbol":"tBTC", "decimals":8};
+    transfer_dry_run.network = {"network":"testnet", "blockchain":"defichain"};
+    currency                 = {"symbol":"tDFI", "decimals":8};
 
     // We set the max_fee_amount to know how much buffer we should
     // leave for fee payment when selecting a sender account.
@@ -165,8 +179,8 @@ transfer(10){
 
 return_funds(10){
   transfer_dry_run{
-    transfer_dry_run.network = {"network":"Testnet3", "blockchain":"defichain"};
-    currency = {"symbol":"tBTC", "decimals":8};
+    transfer_dry_run.network = {"network":"testnet", "blockchain":"defichain"};
+    currency = {"symbol":"tDFI", "decimals":8};
 
     // We look for a sender that is able to pay the 
     // max_fee_amount + min_utxo size (reserved_amount is max_fee_amount + min_utxo size).
