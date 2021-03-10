@@ -10,6 +10,7 @@ require (
 	github.com/google/addlicense v0.0.0-20200906110928-a0294312aa76 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/rs/zerolog v1.20.0 // indirect
+	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.16.0
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208

@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/DeFiCh/rosetta-defichain/utils"
+	"github.com/shopspring/decimal"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -219,31 +220,73 @@ func (b *Client) GetPeers(ctx context.Context) ([]*types.Peer, error) {
 func (b *Client) GetRawBlock(
 	ctx context.Context,
 	identifier *types.PartialBlockIdentifier,
-) (*Block, []string, error) {
+) (_ *Block, coins []string, _ error) {
+
 	block, err := b.getBlock(ctx, identifier)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	coins := []string{}
-	blockTxHashes := []string{}
+	txHashes := make([]string, 0, len(block.Txs))
+	coins = []string{}
+
 	for txIndex, tx := range block.Txs {
-		blockTxHashes = append(blockTxHashes, tx.Hash)
+		txHashes = append(txHashes, tx.Hash)
+
 		for inputIndex, input := range tx.Inputs {
-			txHash, vout, ok := b.getInputTxHash(input, txIndex, inputIndex)
-			if !ok {
+			txHash, vout, isCoinbase := getInputTxHash(input, txIndex, inputIndex)
+			if !isCoinbase {
 				continue
+			}
+
+			// In order to sync genesis block, which contains coinbase `stake` transactions,
+			// for Indexer properly, we add additional semi-valid outputs, to make ends meet
+			// (such as valid transaction hashe references according to UTXO model)
+			if block.Height == genesisBlockIndex {
+				tx0 := block.Txs[0]
+				vout = int64(len(tx0.Outputs))
+
+				// Represents semi-valid output for coinbase `stake` transaction input
+				newOut := *tx0.Outputs[0]
+
+				tx0.Outputs = append(tx0.Outputs, &newOut)
+				tx0.Outputs[vout].Index = vout
+				tx0.Outputs[vout].ScriptPubKey = new(ScriptPubKey)
+				tx0.Outputs[vout].Value, err = sumTxOutValues(tx.Outputs)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				txHash = tx0.Hash
+				input.TxHash = txHash
+				input.Vout = vout
 			}
 
 			// If any transactions spent in the same block they are created, don't include them
 			// in previousTxHashes to fetch.
-			if !rosettaUtils.ContainsString(blockTxHashes, txHash) {
+			if !rosettaUtils.ContainsString(txHashes, txHash) {
 				coins = append(coins, CoinIdentifier(txHash, vout))
 			}
 		}
 	}
 
 	return block, coins, nil
+}
+
+func sumTxOutValues(outputs []*Output) (float64, error) {
+	var sum decimal.Decimal
+
+	for _, out := range outputs {
+		value := decimal.NewFromFloat(out.Value)
+		sum = sum.Add(value)
+	}
+
+	result, isExact := sum.Float64()
+	if !isExact {
+		return -1, errors.New("the result sum doesn't match calculated one exactly")
+	}
+
+	return result, nil
 }
 
 // ParseBlock returns a parsed DeFiChain block given a raw DeFiChain
@@ -748,11 +791,12 @@ func (b *Client) parseOutputTransactionOperation(
 // getInputTxHash returns the transaction hash corresponding to an inputs previous
 // output. If the input is a coinbase input, then no previous transaction is associated
 // with the input.
-func (b *Client) getInputTxHash(
+func getInputTxHash(
 	input *Input,
 	txIndex int,
 	inputIndex int,
-) (string, int64, bool) {
+) (txHash string, vout int64, isCoinbase bool) {
+
 	if isCoinbaseInput(input, txIndex, inputIndex) {
 		return "", -1, false
 	}
@@ -764,19 +808,7 @@ func (b *Client) getInputTxHash(
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
 func isCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
-	// TODO: discuss and accept a decision
-	//
-	// Some transactions has several coinbase inputs - txIndex != 0 && input.Coinbase == "".
-	// This behaviour leads to an infinite loop at indexer.go:558... because syncer entity
-	// thinks, that there're must be previous transactions, but they're not and never be
-	//
-	// ? Is it normal behaviour for blockchain. Mentioned case above was tested on testnet only
-
-	// ! TODO: do revision. See TODO on the 767 line
-	// * Old variant
-	// return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
-	// * New temprorary variant
-	return inputIndex == 0 && input.TxHash == ""
+	return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
 }
 
 // parseInputTransactionOperation returns the types.Operation for the specified
