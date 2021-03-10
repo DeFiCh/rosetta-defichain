@@ -16,7 +16,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/DeFiCh/rosetta-defichain/configuration"
 
@@ -88,9 +87,6 @@ func (s *BlockAPIService) BlockTransaction(
 	if s.config.Mode != configuration.Online {
 		return nil, wrapErr(ErrUnavailableOffline, nil)
 	}
-
-	// FIXME: delete
-	fmt.Printf("/block/tx: %+v\n", request)
 
 	transaction, err := s.i.GetBlockTransaction(
 		ctx,
