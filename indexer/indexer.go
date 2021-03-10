@@ -280,8 +280,6 @@ func (i *Indexer) Sync(ctx context.Context) error {
 
 	startIndex := int64(indexPlaceholder)
 	head, err := i.blockStorage.GetHeadBlockIdentifier(ctx)
-	// FIXME: delete; head: nil
-	fmt.Printf("head block identifier: %+v; err: %+v\n", head, err)
 	if err == nil {
 		startIndex = head.Index + 1
 	}
@@ -291,8 +289,6 @@ func (i *Indexer) Sync(ctx context.Context) error {
 	// Otherwise, none are provided to the cache (the syncer will not attempt
 	// a reorg if the cache is empty).
 	pastBlocks := i.blockStorage.CreateBlockCache(ctx, syncer.DefaultPastBlockLimit)
-	// FIXME: delete; pastBlocks: 0
-	fmt.Printf("updated cache len: %v\n", len(pastBlocks))
 
 	syncer := syncer.New(
 		i.network,
@@ -303,9 +299,6 @@ func (i *Indexer) Sync(ctx context.Context) error {
 		syncer.WithSizeMultiplier(sizeMultiplier),
 		syncer.WithPastBlocks(pastBlocks),
 	)
-
-	// FIXME: delete;
-	fmt.Printf("syncer: %+v; network: %v\n", syncer, i.network)
 
 	return syncer.Sync(ctx, startIndex, indexPlaceholder)
 }
@@ -355,11 +348,7 @@ func (i *Indexer) Prune(ctx context.Context) error {
 
 // BlockAdded is called by the syncer when a block is added.
 func (i *Indexer) BlockAdded(ctx context.Context, block *types.Block) error {
-	// TODO: doesnt get called
 	logger := utils.ExtractLogger(ctx, "indexer")
-	//FIXME: delete
-	fmt.Printf("BlockAdded got called; block: %v\n", block)
-	logger.Debugf("BlockAdded got called; block: %v\n", block)
 
 	err := i.blockStorage.AddBlock(ctx, block)
 	if err != nil {
@@ -888,19 +877,6 @@ func (i *Indexer) GetBlockLazy(
 	ctx context.Context,
 	blockIdentifier *types.PartialBlockIdentifier,
 ) (*types.BlockResponse, error) {
-	// rawBlock, msg, err := i.client.GetRawBlock(ctx, blockIdentifier)
-
-	// // FIXME: delele
-	// fmt.Printf("rawBlock: %+v\n; msg: %+v\n; err: %+v", rawBlock, msg, err)
-
-	// coins := make(map[string]*types.AccountCoin)
-	// block, err := i.client.ParseBlock(ctx, rawBlock, coins)
-
-	// // FIXME: delele
-	// fmt.Printf("block: %+v\n; err: %+v", block, err)
-
-	// return &types.BlockResponse{Block: block}, err
-
 	return i.blockStorage.GetBlockLazy(ctx, blockIdentifier)
 }
 
@@ -911,15 +887,6 @@ func (i *Indexer) GetBlockTransaction(
 	blockIdentifier *types.BlockIdentifier,
 	transactionIdentifier *types.TransactionIdentifier,
 ) (*types.Transaction, error) {
-	// FIXME: delele
-	// tx, err := i.client.GetTransaction(ctx, transactionIdentifier.Hash)
-	fmt.Printf("requesting raw tx; tx-hash: %v; block-hash: %v;\n",
-		transactionIdentifier.Hash, blockIdentifier.Hash)
-
-	tx, err := i.client.GetRawTransaction(ctx, transactionIdentifier.Hash,
-		blockIdentifier.Hash)
-	// FIXME: delele
-	fmt.Printf("tx: %v; err: %+v\n", tx, err)
 
 	return i.blockStorage.GetBlockTransaction(
 		ctx,
