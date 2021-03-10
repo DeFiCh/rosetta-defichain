@@ -79,6 +79,7 @@ const (
 // Fee estimate constants
 // Source: https://bitcoinops.org/en/tools/calc-size/
 const (
+	// TODO: revision
 	MinFeeRate            = float64(0.00001) // nolint:gomnd
 	TransactionOverhead   = 12               // 4 version, 2 segwit flag, 1 vin, 1 vout, 4 lock time
 	InputSize             = 68               // 4 prev index, 32 prev hash, 4 sequence, 1 script size, ~27 script witness
