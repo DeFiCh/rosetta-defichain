@@ -468,6 +468,10 @@ func (s *ConstructionAPIService) ConstructionCombine(
 		switch class {
 		case txscript.WitnessV0PubKeyHashTy:
 			tx.TxIn[i].Witness = wire.TxWitness{fullsig, pkData}
+
+		case txscript.PubKeyHashTy:
+			tx.TxIn[i].SignatureScript = request.Signatures[i].Bytes
+
 		default:
 			return nil, wrapErr(
 				ErrUnsupportedScriptType,
