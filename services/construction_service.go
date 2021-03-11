@@ -357,6 +357,21 @@ func (s *ConstructionAPIService) ConstructionPayloads(
 				Bytes:         hash,
 				SignatureType: types.Ecdsa,
 			}
+
+		case txscript.PubKeyHashTy:
+			hash, err := txscript.CalcSignatureHash(script, txscript.SigHashAll, tx, i)
+			if err != nil {
+				return nil, wrapErr(ErrUnableToCalculateSignatureHash, err)
+			}
+
+			payloads[i] = &types.SigningPayload{
+				AccountIdentifier: &types.AccountIdentifier{
+					Address: address,
+				},
+				Bytes:         hash,
+				SignatureType: types.Ecdsa,
+			}
+
 		default:
 			return nil, wrapErr(
 				ErrUnsupportedScriptType,
