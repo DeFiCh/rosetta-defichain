@@ -94,6 +94,7 @@ var (
 		Hash: "279b1a87aedc7b9471d4ad4e5f12967ab6259926cd097ade188dfcf22ebfe72a",
 	}
 
+	// ! TODO: fix *chaincfg values to make properly formatted addresses
 	// MainnetParams are the params for mainnet.
 	MainnetParams = &chaincfg.MainNetParams
 
@@ -108,6 +109,7 @@ var (
 		Hash: "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943",
 	}
 
+	// ! TODO: fix *chaincfg values to make properly formatted addresses
 	// TestnetParams are the params for testnet.
 	TestnetParams = &chaincfg.TestNet3Params
 
