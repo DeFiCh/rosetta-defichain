@@ -71,10 +71,13 @@ func (s *ConstructionAPIService) ConstructionDerive(
 	ctx context.Context,
 	request *types.ConstructionDeriveRequest,
 ) (*types.ConstructionDeriveResponse, *types.Error) {
-	addr, err := btcutil.NewAddressWitnessPubKeyHash(
-		btcutil.Hash160(request.PublicKey.Bytes),
-		s.config.Params,
-	)
+	// TODO: decide which address types to support
+	addr, err := btcutil.NewAddressPubKey(request.PublicKey.Bytes, s.config.Params)
+	//
+	// addr, err := btcutil.NewAddressWitnessPubKeyHash(
+	// 	btcutil.Hash160(request.PublicKey.Bytes),
+	// 	s.config.Params,
+	// )
 	if err != nil {
 		return nil, wrapErr(ErrUnableToDerive, err)
 	}
