@@ -28,6 +28,19 @@
     "end_conditions": {
       "main": 1
     },
-    }
+    "prefunded_accounts": [
+      {
+        "privkey": "c59019a74745478595364a45c9eea1d7e51c353ced29458c3ffae11b3fcf0edb",
+        "account_identifier": {
+          "address": "tWMZ2J6LaiF1bLwWZGZmjYzWq58kuLhMYh"
+        },
+        "curve_type": "secp256k1",
+        "currency": {
+          "symbol": "tDFI",
+          "decimals": 8,
+          "metadata": {}
+        }
+      }
+    ]
   }
 }
