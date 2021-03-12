@@ -1,0 +1,132 @@
+// NOTE: DeFiChain doesn't provide a faucet or a way with a similar to a faucet functionality,
+// that is why we don't have to implement `create_account` reserved workflow, rather we heve 
+// to provide already prefunded account via configuration file
+//
+// [!] THIS SCRIPT WORKS UNTIL A PROVIDED PREFUNDED ACCOUNT HAS ENOUGH ASSETS. AFTER EACH 
+//     SCRIPT EXECUTION ACCOUNT FUNDS ARE BEING DECREASED BY MINIMUM FEE AMOUNT. RIGHT AFTER 
+//     AMOUNT WILL BE DECREASED AND BE NEAR ABOUT ZERO, ACCOUNT MUST BE FUNDED MANUALLY AGAIN
+//     OR REPLACED WITH ANOTHER PREFUNDED ACCOUNT AT USED CONFIGURATION FILE
+//     
+// [!] IF ROSETTA-CLI OF 0.6.7 AND BELOW VERSION ARE USED, MAKE SURE TO NOT SET `TIP_DALAY` 
+//     PARAMETER, AS IT LEADS TO STALE. THIS HAPPENS, BECAUSE ROSETTA-CLI TRIES TO SYNC LAST 
+//     BLOCKS ONLY, WHICH MAY NOT CONTAIN ANY INFORMATION ABOUT FUNDS OF AN ACCOUNT. SINCE 
+//     WE ARE USING PREFUNDED ACCOUNT, WE ARE SAFE FROM THIS CIRCUMSTANCES
+//
+// TODO: add fixed rosetta-cli instance and complete the warning below
+// [!] THIS SCRIPT DOESN'T WORK WITH ROSETTA-CLI OF 0.6.7 AND BELOW VERSION, BECAUSE 
+//     MENTIONED ROSETTA-CLI VERSIONS DOESN'T ACQUIRE ACCOUNT COINS FOR AUTOMATED UTXO 
+//     HANDLING. FOR EXECUTION OF THIS SCRIPT, PLEASE, USE 
+
+main(1){
+    init_shared_vars{
+        network  = {"network":"testnet", "blockchain":"defichain"};
+        currency = {"symbol":"tDFI", "decimals":8};
+    },
+
+    load_sending_account{
+        sending_account = find_balance({
+            
+            // TODO: correct `value` with min output value + min fee 
+            //
+            // NOTE: provided via configuration file prefunded account 
+            // must have 5 DFI (tDFI) at least for correct script 
+            // execution process
+            "minimum_balance":{
+                "value"   : "5",  
+                "currency": {{currency}}
+            },
+            "require_coin": true
+        });
+
+        print_message({"loaded_sender_account": {{sending_account}}});
+    },
+
+    // We perform this scenario for only `/construction/derive` endpoint test
+    // purpose. Later, we replace receiving_account with sending_account in
+    // order not to lock sending_account funds accidentely
+    create_receiving_account{
+        receiving_account_keys = generate_key({"curve_type": "secp256k1"});
+
+        receiving_account = derive({
+            "network_identifier": {{network}},
+            "public_key"        : {{receiving_account_keys.public_key}}
+        });
+
+        // TODO: use newly created account, after *chaincfg will be chanded,
+        // or implement separate workflow may be
+
+        // NOTE: we must save newly created account (receiving) within a rosetta-cli too,
+        // in order to return received funds to a sending account at `return_funds` 
+        // reserved workflow. Otherwise received funds will become locked for forever
+        //
+        // However we set receiving_account to be the same as sending_account later, 
+        // performing `save_account` action is not necessary, but leave this code just 
+        // for example
+        save_account({
+            "account_identifier": {{receiving_account.account_identifier}},
+            "keypair"           : {{receiving_account_keys}}
+        });
+        
+        print_message({"created_receiving_account": {{receiving_account}}});
+    },
+
+    replace_receiving_account{
+        receiving_account = {{sending_account}};
+
+        message = {
+            "message"          : "receiving_account has been replaced with sending_account",
+            "receiving_account": {{receiving_account}}
+        };
+        print_message({"INFO": {{message}}});
+    },
+
+    broadcast{
+        // In order to broadcast transaction we have to populate special fields of the
+        // scenario. All required by Rosetta API specification requests will be 
+        // executed in a predefined by flow under the hood, right after this scenario 
+        // comes to an end
+
+        broadcast.network            = {{network}};
+        broadcast.confirmation_depth = 6;
+
+        // We must convert amount to be negative for an INPUT operation.
+        // We do this `math` operation here, because direct evaluation 
+        // at []operations below is not recognizable by parser
+        sending_amount = math({"operation": "subtraction", "left_value": "0", "right_value": {{sending_account.balance.value}}});
+
+        broadcast.operations = [
+            {
+                "operation_identifier": {
+                    "index": 0
+                    // TODO: try to leave this field unfilled, cause all we need is the last char of identifier
+                    // "network_index": {{sending_account.coin.identifier}}
+                },
+                "type": "INPUT",
+                "account": {{sending_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                },
+                "coin_change": {
+                    "coin_identifier": {{sending_account.coin}},
+                    "coin_action": "coin_spent"
+                }
+            },
+            {
+                "operation_identifier": {
+                    "index": 1
+                },
+                "type": "OUTPUT",
+                "account": {{receiving_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_account.balance.value}},
+                    "currency": {{currency}}
+                }
+                // TODO: add amount change?
+            }
+        ];
+    }
+}
+
+// NOTE: we don't have to implement `return_funds` reserved workflow, 
+// because sending_account and receiving_account are the same
