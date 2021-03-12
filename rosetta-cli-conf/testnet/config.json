@@ -26,7 +26,8 @@
     "broadcast_limit": 1,
     "constructor_dsl_file": "construction_api.ros",
     "end_conditions": {
-      "request_funds": 1
+      "main": 1
+    },
     }
   }
 }
