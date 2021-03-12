@@ -24,6 +24,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DeFiCh/rosetta-defichain/utils"
@@ -235,7 +236,7 @@ func (b *Client) GetRawBlock(
 
 		for inputIndex, input := range tx.Inputs {
 			txHash, vout, isCoinbase := getInputTxHash(input, txIndex, inputIndex)
-			if !isCoinbase {
+			if isCoinbase {
 				continue
 			}
 
@@ -798,17 +799,24 @@ func getInputTxHash(
 ) (txHash string, vout int64, isCoinbase bool) {
 
 	if isCoinbaseInput(input, txIndex, inputIndex) {
-		return "", -1, false
+		return "", -1, true
 	}
 
-	return input.TxHash, input.Vout, true
+	return input.TxHash, input.Vout, false
 }
 
 // isCoinbaseInput returns whether the specified input is
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
+// But some coinbase transactions follows right after first transaction.
 func isCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
-	return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+	if txIndex == 0 {
+		return inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+	}
+	if inputIndex == 0 && input.TxHash == "" {
+		return strings.HasSuffix(input.Coinbase, "00")
+	}
+	return false
 }
 
 // parseInputTransactionOperation returns the types.Operation for the specified
