@@ -71,13 +71,10 @@ func (s *ConstructionAPIService) ConstructionDerive(
 	ctx context.Context,
 	request *types.ConstructionDeriveRequest,
 ) (*types.ConstructionDeriveResponse, *types.Error) {
-	// TODO: decide which address types to support
-	addr, err := btcutil.NewAddressPubKey(request.PublicKey.Bytes, s.config.Params)
-	//
-	// addr, err := btcutil.NewAddressWitnessPubKeyHash(
-	// 	btcutil.Hash160(request.PublicKey.Bytes),
-	// 	s.config.Params,
-	// )
+	addr, err := btcutil.NewAddressWitnessPubKeyHash(
+		btcutil.Hash160(request.PublicKey.Bytes),
+		s.config.Params,
+	)
 	if err != nil {
 		return nil, wrapErr(ErrUnableToDerive, err)
 	}
@@ -361,20 +358,6 @@ func (s *ConstructionAPIService) ConstructionPayloads(
 				SignatureType: types.Ecdsa,
 			}
 
-		case txscript.PubKeyHashTy:
-			hash, err := txscript.CalcSignatureHash(script, txscript.SigHashAll, tx, i)
-			if err != nil {
-				return nil, wrapErr(ErrUnableToCalculateSignatureHash, err)
-			}
-
-			payloads[i] = &types.SigningPayload{
-				AccountIdentifier: &types.AccountIdentifier{
-					Address: address,
-				},
-				Bytes:         hash,
-				SignatureType: types.Ecdsa,
-			}
-
 		default:
 			return nil, wrapErr(
 				ErrUnsupportedScriptType,
@@ -471,9 +454,6 @@ func (s *ConstructionAPIService) ConstructionCombine(
 		switch class {
 		case txscript.WitnessV0PubKeyHashTy:
 			tx.TxIn[i].Witness = wire.TxWitness{fullsig, pkData}
-
-		case txscript.PubKeyHashTy:
-			tx.TxIn[i].SignatureScript = request.Signatures[i].Bytes
 
 		default:
 			return nil, wrapErr(
