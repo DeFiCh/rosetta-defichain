@@ -14,8 +14,11 @@
   "compression_disabled": true,
 
   "data": {
+    "initial_balance_fetch_disabled": true,
     "end_conditions": {
-      "index": 1000
+      "reconciliation_coverage": {
+        "coverage": 0.95
+      }
     }
   },
 
