@@ -18,4 +18,4 @@ require (
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )
 
-replace github.com/btcsuite/btcd v0.21.0-beta => github.com/DeFiCh/dfid v0.21.0-beta
+replace github.com/btcsuite/btcd v0.21.0-beta => github.com/DeFiCh/dfid v0.21.1-beta
