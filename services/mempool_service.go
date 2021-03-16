@@ -74,23 +74,26 @@ func (s *MempoolAPIService) MempoolTransaction(
 	}
 
 	txHash := ""
-	if request != nil {
-		if request.TransactionIdentifier != nil {
+	if request != nil && request.TransactionIdentifier != nil {
 			txHash = request.TransactionIdentifier.Hash
 		}
+	if txHash == "" {
+		return nil, wrapErr(ErrTransactionNotFound, nil)
 	}
 
 	tx, err := s.client.GetRawTransaction(ctx, txHash, "")
-	if err != nil || tx == nil || tx.Hash == "" {
-		// if err != nil || tx == nil {
+	if err != nil || tx == nil {
 		return nil, wrapErr(ErrTransactionNotFound, nil)
 	}
+
+	metadata, _ := tx.Metadata()
 
 	resp := &types.MempoolTransactionResponse{
 		Transaction: &types.Transaction{
 			TransactionIdentifier: &types.TransactionIdentifier{
 				Hash: tx.Hash,
 			},
+			Metadata: metadata,
 		},
 	}
 	return resp, nil
