@@ -29,11 +29,11 @@
   "construction": {
     "offline_url": "http://localhost:8080",
     "max_offline_connections": 1,
-    "stale_depth": 6,
+    "stale_depth": 15,
     "broadcast_limit": 10,
     "constructor_dsl_file": "construction_api.ros",
     "end_conditions": {
-      "main": 1
+      "transfer": 1
     },
     "prefunded_accounts": [
       {

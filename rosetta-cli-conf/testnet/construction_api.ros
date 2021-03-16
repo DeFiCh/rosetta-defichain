@@ -7,13 +7,13 @@
 //     AFTER AMOUNT WILL BE DECREASED AND BE NEAR ABOUT ZERO, ACCOUNT MUST BE FUNDED 
 //     MANUALLY AGAIN OR REPLACED WITH ANOTHER PREFUNDED ACCOUNT AT USED CONFIGURATION 
 //     FILE
-//     
+//
 // TODO: add fixed rosetta-cli instance and complete the warning below
 // [!] THIS SCRIPT DOESN'T WORK WITH ROSETTA-CLI OF 0.6.7 AND BELOW VERSION, BECAUSE 
 //     MENTIONED ROSETTA-CLI VERSIONS DOESN'T ACQUIRE ACCOUNT COINS FOR AUTOMATED UTXO 
 //     HANDLING. FOR EXECUTION OF THIS SCRIPT, PLEASE, USE 
 
-main(1){
+transfer(1){
     init_shared_vars{
         network  = {"network":"testnet", "blockchain":"defichain"};
         currency = {"symbol":"tDFI", "decimals":8};
