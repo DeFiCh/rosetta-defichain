@@ -80,7 +80,6 @@ const (
 	requestMethodGetRawTransaction requestMethod = "getrawtransaction"
 
 	// https://developer.bitcoin.org/reference/rpc/gettransaction.html
-	// TODO: defid returns method not found
 	requestMethodGetTransaction requestMethod = "gettransaction"
 
 	// https://developer.bitcoin.org/reference/rpc/estimatesmartfee.html
