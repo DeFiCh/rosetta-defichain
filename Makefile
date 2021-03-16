@@ -106,7 +106,7 @@ CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
 check-data-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:data --configuration-file ${CLI_TESTNET_CONFIG_PATH}
 
-test-rosetta-construction-api: check-testnet-rosetta-cli-configuration
+check-construction-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:construction --configuration-file ${CLI_TESTNET_CONFIG_PATH}
 
 check-testnet-rosetta-cli-configuration:
