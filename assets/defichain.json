@@ -4,7 +4,7 @@
     "network": "mainnet"
   },
   "online_url": "http://localhost:8080",
-  "data_directory": "",
+  "data_directory": "/data/dfid",
   "http_timeout": 10,
   "sync_concurrency": 8,
   "transaction_concurrency": 16,
@@ -12,6 +12,6 @@
   "disable_memory_limit": false,
   "log_configuration": false,
   "data": {
-    "historical_balance_disabled": true
+    "historical_balance_disabled": false
   }
 }

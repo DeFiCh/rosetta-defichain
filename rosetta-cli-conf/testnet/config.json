@@ -12,12 +12,16 @@
   "max_retries": 10,
   "memory_limit_disabled": true,
   "compression_disabled": true,
+  "tip_delay": 9999999,
+  "data_directory": "./cli-data",
 
   "data": {
-    "initial_balance_fetch_disabled": true,
     "end_conditions": {
+      "tip": true,
       "reconciliation_coverage": {
-        "coverage": 0.95
+        "coverage": 0.95,
+        "from_tip": true,
+        "tip": true
       }
     }
   },
