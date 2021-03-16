@@ -75,8 +75,8 @@ func (s *MempoolAPIService) MempoolTransaction(
 
 	txHash := ""
 	if request != nil && request.TransactionIdentifier != nil {
-			txHash = request.TransactionIdentifier.Hash
-		}
+		txHash = request.TransactionIdentifier.Hash
+	}
 	if txHash == "" {
 		return nil, wrapErr(ErrTransactionNotFound, nil)
 	}
@@ -93,6 +93,9 @@ func (s *MempoolAPIService) MempoolTransaction(
 			TransactionIdentifier: &types.TransactionIdentifier{
 				Hash: tx.Hash,
 			},
+			// TODO: add operations
+			// Operations: []*types.Operation{
+			// },
 			Metadata: metadata,
 		},
 	}
