@@ -58,7 +58,7 @@ transfer(1){
         //
         // However we set `dry_run` parameter to `true` value now. It means, that 
         // built transaction will not be submitted. This is done to acquire
-        // `broadcast_dry.suggested_fee`, which will be accessable after 
+        // `broadcast_dry.suggested_fee`, which will be accessible after 
         // `broadcast_dry` finishes, so we can use this value to subtract from 
         // sending amount in a final transaction
         broadcast_dry.dry_run = true;
