@@ -43,7 +43,7 @@ RUN mkdir -p /app \
   && chown -R nobody:nogroup /app
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl make gcc g++
+RUN apt-get update && apt-get install -y curl make gcc g++ git
 ENV GOLANG_VERSION 1.15.5
 ENV GOLANG_DOWNLOAD_SHA256 9a58494e8da722c3aef248c9227b0e9c528c7318309827780f16220998180a0d
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
@@ -57,14 +57,15 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-# Use native remote build context to build in any directory
-COPY . src
-RUN cd src \
-  && go build \
+# TODO: update checkout to be a specific commit hash
+RUN cd .. \
+  && git clone https://github.com/DeFiCh/rosetta-defichain.git \
+  && cd rosetta-defichain \ 
+  && git checkout master \ 
+  && go build -o /app/rosetta-defichain main.go \
+  && mv rosetta-defichain/assets/* /app \
   && cd .. \
-  && mv src/rosetta-defichain /app/rosetta-defichain \
-  && mv src/assets/* /app \
-  && rm -rf src
+  && rm -rf rosetta-defichain
 
 ## Build Final Image
 FROM ubuntu:18.04
