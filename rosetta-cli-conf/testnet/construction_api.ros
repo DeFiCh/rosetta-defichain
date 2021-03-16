@@ -156,19 +156,19 @@ return_funds(1){
     },
 
     load_accounts{
-        sending_account_id = get_blob({"key": "receiving_account"});
-        sending_account    = find_balance({
+        receiving_account_id = get_blob({"key": "receiving_account"});
+        receiving_account    = find_balance({
             "minimum_balance":{
                 "value"   : "1",  
                 "currency": {{currency}}
             },
-            "account_identifier": {{sending_account_id.account_identifier}},
+            "account_identifier": {{receiving_account_id.account_identifier}},
             "require_coin": true
         });
-        receiving_account = get_blob({"key": "sending_account"});
+        sending_account = get_blob({"key": "sending_account"});
 
-        print_message({"loaded receiving_account": {{receiving_account}}});
-        print_message({"loaded sending_account": {{sending_account}}});
+        print_message({"loaded receiving_account (sender)": {{receiving_account}}});
+        print_message({"loaded sending_account (receiver)": {{sending_account}}});
     },
 
     broadcast_dry{
@@ -176,7 +176,7 @@ return_funds(1){
         broadcast_dry.network            = {{network}};
         broadcast_dry.confirmation_depth = 1; 
 
-        sending_amount   = 0 - {{sending_account.balance.value}};
+        sending_amount   = 0 - {{receiving_account.balance.value}};
 
         broadcast_dry.operations = [
             {
@@ -184,13 +184,13 @@ return_funds(1){
                     "index": 0
                 },
                 "type": "INPUT",
-                "account": {{sending_account.account_identifier}},
+                "account": {{receiving_account.account_identifier}},
                 "amount": {
                     "value": {{sending_amount}},
                     "currency": {{currency}}
                 },
                 "coin_change": {
-                    "coin_identifier": {{sending_account.coin}}, 
+                    "coin_identifier": {{receiving_account.coin}}, 
                     "coin_action": "coin_spent"
                 }
             },
@@ -199,7 +199,7 @@ return_funds(1){
                     "index": 1
                 },
                 "type": "OUTPUT",
-                "account": {{receiving_account.account_identifier}},
+                "account": {{sending_account.account_identifier}},
                 "amount": {
                     "value": {{sending_amount}},
                     "currency": {{currency}}
@@ -212,8 +212,8 @@ return_funds(1){
         broadcast.network            = {{network}};
         broadcast.confirmation_depth = 1;
 
-        sending_amount   = 0 - {{sending_account.balance.value}};
-        receiving_amount = {{sending_account.balance.value}} - {{broadcast_dry.suggested_fee.0.value}};
+        sending_amount   = 0 - {{receiving_account.balance.value}};
+        receiving_amount = {{receiving_account.balance.value}} - {{broadcast_dry.suggested_fee.0.value}};
         assert({{receiving_amount}});
 
         broadcast.operations = [
@@ -222,13 +222,13 @@ return_funds(1){
                     "index": 0
                 },
                 "type": "INPUT",
-                "account": {{sending_account.account_identifier}},
+                "account": {{receiving_account.account_identifier}},
                 "amount": {
                     "value": {{sending_amount}},
                     "currency": {{currency}}
                 },
                 "coin_change": {
-                    "coin_identifier": {{sending_account.coin}}, 
+                    "coin_identifier": {{receiving_account.coin}}, 
                     "coin_action": "coin_spent"
                 }
             },
@@ -237,7 +237,7 @@ return_funds(1){
                     "index": 1
                 },
                 "type": "OUTPUT",
-                "account": {{receiving_account.account_identifier}},
+                "account": {{sending_account.account_identifier}},
                 "amount": {
                     "value": {{receiving_amount}},
                     "currency": {{currency}}
