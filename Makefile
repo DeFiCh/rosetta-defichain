@@ -103,7 +103,7 @@ CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
 # CONSTRUCTION:
 # - https://pkg.go.dev/github.com/coinbase/rosetta-cli/configuration#ConstructionConfiguration
 
-test-testnet-rosetta-specification: check-testnet-rosetta-cli-configuration
+check-data-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:data --configuration-file ${CLI_TESTNET_CONFIG_PATH}
 
 test-rosetta-construction-api: check-testnet-rosetta-cli-configuration
