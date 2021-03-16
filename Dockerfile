@@ -28,8 +28,6 @@ RUN git clone  https://github.com/DeFiCh/ain \
   && cd ain \
   && git checkout 5bb08f5f750eed8ff3927c44889ed3031ae96d60
 
-# TODO: 
-# ?! Update configure flags
 RUN cd ain \
   && ./autogen.sh \
   && ./configure --disable-tests --without-miniupnpc --without-gui --with-incompatible-bdb --disable-hardening --disable-zmq --disable-bench \
