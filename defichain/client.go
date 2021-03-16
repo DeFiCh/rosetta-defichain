@@ -353,8 +353,6 @@ func (b *Client) GetRawTransaction(
 		return nil, err
 	}
 
-	fmt.Printf("raw tx resp: %v\n", string(response.Result))
-
 	if err := json.Unmarshal(response.Result, &resp); err != nil {
 		return nil, fmt.Errorf("%w: error unmarshaling raw transaction", err)
 	}
