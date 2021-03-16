@@ -32,6 +32,8 @@
     "stale_depth": 15,
     "broadcast_limit": 10,
     "constructor_dsl_file": "construction_api.ros",
+    "block_broadcast_limit": 1,
+    "rebroadcast_all": true,
     "end_conditions": {
       "transfer": 1
     },
