@@ -75,9 +75,9 @@ docker run -d -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081:8081
 ```
 _If you cloned the repository, you can run `make run-testnet-offline`._
 
-## System Requirements
-`rosetta-defichain` has been tested on an [AWS c5.2xlarge instance](https://aws.amazon.com/ec2/instance-types/c5).
-This instance type has 8 vCPU and 16 GB of RAM.
+#### General information about ports
+  - Online API port is 8080
+  - Offline API port is 8081
 
 ### Network Settings
 To increase the load `rosetta-defichain` can handle, it is recommended to tune your OS
