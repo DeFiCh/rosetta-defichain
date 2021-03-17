@@ -34,7 +34,7 @@ build-release:
 	docker save rosetta-defichain:$(version) | gzip > rosetta-defichain-$(version).tar.gz;
 
 run-mainnet-online:
-	docker run -d --ulimit --name ${CONTAINER_NAME} "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 rosetta-defichain:latest
+	docker run -d --name ${CONTAINER_NAME} --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 rosetta-defichain:latest
 
 run-mainnet-offline:
 	docker run -d --rm --name ${CONTAINER_NAME} -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
