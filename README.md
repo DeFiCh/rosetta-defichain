@@ -233,8 +233,6 @@ If you cloned the repository, you can run the following make rules respectively:
 ## Future Work
 * Add CI test using `rosetta-cli` to run on each PR
 
-_Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
-
 ## Development
 * `make deps` to install dependencies
 * `make test` to run tests
