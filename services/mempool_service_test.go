@@ -71,10 +71,48 @@ func TestMempoolEndpoints_Online(t *testing.T) {
 		},
 	}, mem)
 
-	mockClient.On("GetRawTransaction", ctx, "", "").Return(&defichain.Transaction{}, nil)
-	memTransaction, err := servicer.MempoolTransaction(ctx, nil)
-	assert.Nil(t, memTransaction)
-	assert.Equal(t, ErrTransactionNotFound.Code, err.Code)
-	assert.Equal(t, ErrTransactionNotFound.Message, err.Message)
+	mockClient.On("GetRawTransaction", ctx, "tx_hash", "").Return(&defichain.Transaction{
+		Hash: "tx_hash",
+		Inputs: []*defichain.Input{
+			{
+				TxHash: "input_tx_hash",
+				Vout:   0,
+			},
+		},
+		Outputs: []*defichain.Output{
+			{
+				Value: 1000000000,
+				Index: 0,
+			},
+		},
+	}, nil)
+	memTransaction, err := servicer.MempoolTransaction(ctx, &types.MempoolTransactionRequest{
+		TransactionIdentifier: &types.TransactionIdentifier{
+			Hash: "tx_hash",
+		},
+	})
+
+	var vout int64 = 0
+	assert.Equal(t, &types.Transaction{
+		TransactionIdentifier: &types.TransactionIdentifier{
+			Hash: "tx_hash",
+		},
+		Operations: []*types.Operation{
+			{
+				OperationIdentifier: &types.OperationIdentifier{
+					Index:        0,
+					NetworkIndex: &vout,
+				},
+				Type: defichain.InputOpType,
+			},
+			{
+				OperationIdentifier: &types.OperationIdentifier{
+					Index: 1,
+				},
+				Type: defichain.OutputOpType,
+			},
+		},
+	}, memTransaction.Transaction)
+
 	mockClient.AssertExpectations(t)
 }
