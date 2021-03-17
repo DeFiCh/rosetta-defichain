@@ -15,6 +15,8 @@ TEST_SCRIPT=go test ${GO_PACKAGES}
 LINT_SETTINGS=golint,misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
 PWD=$(shell pwd)
 NOFILE=100000
+CONTAINER_NAME = rosetta-defichain
+
 
 deps:
 	go get ./...
@@ -31,16 +33,16 @@ build-release:
 	docker save rosetta-defichain:$(version) | gzip > rosetta-defichain-$(version).tar.gz;
 
 run-mainnet-online:
-	docker run -d --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 8333:8333 -p 8554:8554 -p 8555:8555 rosetta-defichain:latest
+	docker run -d --ulimit --name ${CONTAINER_NAME} "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 8333:8333 -p 8554:8554 -p 8555:8555 rosetta-defichain:latest
 
 run-mainnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
 
 run-testnet-online:
-	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 18333:18333 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 18333:18333 rosetta-defichain:latest
 
 run-testnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
 
 train:
 	./zstd-train.sh $(network) transaction $(data-directory)
@@ -89,9 +91,6 @@ mocks:
 	mockery --dir services --all --case underscore --outpkg services --output mocks/services;
 	${ADDLICENCE_SCRIPT} .;
 
-# NOTE: may be provided as an environment variable
-CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
-
 # Possible configuration parameters:
 # ----------------------------------
 # GENERAL:
@@ -116,6 +115,9 @@ check-data-api: check-testnet-rosetta-cli-configuration
 
 check-construction-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:construction --configuration-file ${CLI_TESTNET_CONFIG_PATH}
+
+# NOTE: may be provided as an environment variable
+CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
 
 check-testnet-rosetta-cli-configuration:
 	rosetta-cli configuration:validate ${CLI_TESTNET_CONFIG_PATH}
