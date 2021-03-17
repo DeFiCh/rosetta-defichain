@@ -1,6 +1,7 @@
 .PHONY: deps build run lint mocks run-mainnet-online run-mainnet-offline run-testnet-online \
 	run-testnet-offline check-comments add-license check-license shorten-lines test \
-	coverage spellcheck salus build-local coverage-local format check-format
+	coverage spellcheck salus build-local coverage-local format check-format check-data-api \
+	check-construction-api check-testnet-rosetta-cli-configuration
 
 ADDLICENSE_CMD=go run github.com/google/addlicense
 ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Coinbase, Inc." -l "apache" -v
