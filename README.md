@@ -221,9 +221,7 @@ and run one of the following commands:
 * `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json`
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json`
 
-```text
-NOTE: as you may notice, we suggests to use our fork instead of an original rosetta-cli implementation. This is because current version of rosetta-cli doesn't call /account/coins endpoint to fetch UTXOs for every prefunded account. That's why check for construction API with prefunded account doesn't work. For the issue details, please, see the following [description](https://github.com/coinbase/rosetta-cli/issues/222)
-```
+__NOTE: as you may notice, we suggests to use our fork instead of an original rosetta-cli implementation. This is because current version of rosetta-cli doesn't call /account/coins endpoint to fetch UTXOs for every prefunded account. That's why check for construction API with prefunded account doesn't work. For the issue details, please, see the following [description](https://github.com/coinbase/rosetta-cli/issues/222)__
 
 If you cloned the repository, you can run the following make rules respectively:
 * `make check-testnet-data-api`
