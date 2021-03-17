@@ -231,11 +231,7 @@ If you cloned the repository, you can run the following make rules respectively:
 * `make check-mainnet-data-api`
 
 ## Future Work
-* Publish benchmarks for sync speed, storage usage, and load testing
-* [Rosetta API `/mempool/transaction`](https://www.rosetta-api.org/docs/MempoolApi.html#mempooltransaction) implementation
-* Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
-* Add performance mode to use unlimited RAM (implementation currently optimized to use <= 16 GB of RAM)
-* Support Multi-Sig Sends
+* Add CI test using `rosetta-cli` to run on each PR
 
 _Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
 
