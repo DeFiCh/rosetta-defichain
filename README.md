@@ -118,7 +118,7 @@ with the command: `ulimit -n 100000`.
 ### Memory-Mapped Files
 `rosetta-defichain` uses [memory-mapped files](https://en.wikipedia.org/wiki/Memory-mapped_file) to
 persist data in the `indexer`. As a result, you **must** run `rosetta-defichain` on a 64-bit
-architecture (the virtual address space easily exceeds 100s of GBs).
+architecture.
 
 If you receive a kernel OOM, you may need to increase the allocated size of swap space
 on your OS. There is a great tutorial for how to do this on Linux [here](https://linuxize.com/post/create-a-linux-swap-file/).
@@ -215,11 +215,20 @@ in recently processed blocks to save to disk.
 ```
 
 ## Testing with rosetta-cli
-To validate `rosetta-defichain`, [install `rosetta-cli`](https://github.com/coinbase/rosetta-cli#install)
+To validate `rosetta-defichain`, [install `rosetta-cli`](https://github.com/DeFiDev/rosetta-cli/tree/v0.6.7-1#install)
 and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/testnet/config.json`
 * `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json`
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json`
+
+```text
+NOTE: as you may notice, we suggests to use our fork instead of an original rosetta-cli implementation. This is because current version of rosetta-cli doesn't call /account/coins endpoint to fetch UTXOs for every prefunded account. That's why check for construction API with prefunded account doesn't work. For the issue details, please, see the following [description](https://github.com/coinbase/rosetta-cli/issues/222)
+```
+
+If you cloned the repository, you can run the following make rules respectively:
+* `make check-testnet-data-api`
+* `make check-testnet-construction-api` 
+* `make check-mainnet-data-api`
 
 ## Future Work
 * Publish benchmarks for sync speed, storage usage, and load testing
