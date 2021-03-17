@@ -67,9 +67,6 @@ func StartDefid(ctx context.Context, configPath string, g *errgroup.Group) error
 	logger := utils.ExtractLogger(ctx, "defid")
 	cmd := exec.Command(
 		"/app/defid",
-		// As our node running in a prunning mode it may
-		// be needed to recover on a restart
-		"-reindex",
 		fmt.Sprintf("--conf=%s", configPath),
 	) // #nosec G204
 
