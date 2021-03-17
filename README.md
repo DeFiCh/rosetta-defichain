@@ -215,7 +215,7 @@ in recently processed blocks to save to disk.
 ```
 
 ## Testing with rosetta-cli
-To validate `rosetta-defichain`, [install `rosetta-cli`](https://github.com/DeFiDev/rosetta-cli/tree/v0.6.7-1#install)
+To validate `rosetta-defichain`, [install `rosetta-cli`](https://github.com/DeFiCh/rosetta-cli/tree/master#install)
 and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/testnet/config.json`
 * `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json`
