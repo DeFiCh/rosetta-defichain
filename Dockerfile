@@ -57,12 +57,13 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-RUN git clone https://github.com/DeFiCh/rosetta-defichain.git src \
-  && cd src \ 
-  && git checkout defi-node \ 
-  && go build -o /app/rosetta-defichain main.go \
-  && mv assets/* /app \
-  && cd .. \ 
+# Use native remote build context to build in any directory
+COPY . src
+RUN cd src \
+  && go build \
+  && cd .. \
+  && mv src/rosetta-defichain /app/rosetta-defichain \
+  && mv src/assets/* /app \
   && rm -rf src
 
 ## Build Final Image
