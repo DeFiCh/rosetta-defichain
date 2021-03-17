@@ -79,6 +79,24 @@ _If you cloned the repository, you can run `make run-testnet-offline`._
   - Online API port is 8080
   - Offline API port is 8081
 
+## Requirements
+### Machine
+The following results may be expected by running rosetta-defichain on a machine with characteristics comparable to the following:
+* x8 CPU i5-8250U  @ 1.60GHz
+* ~8 GB RAM & ~4-12 SWAP
+
+### Mainnet:
+* about 40 GB of disk space usage
+* about 4 hours to sync
+
+### Testnet:
+* about 20 GB of disk space usage
+* about 2 hours to sync
+
+```text
+NOTE: presented values may change, since blockchain data is growing up continuously
+```
+
 ### Network Settings
 To increase the load `rosetta-defichain` can handle, it is recommended to tune your OS
 settings to allow for more connections. On a linux-based OS, you can run the following
