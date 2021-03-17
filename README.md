@@ -240,10 +240,9 @@ _Please reach out on our [community](https://community.rosetta-api.org) if you w
 * `make test` to run tests
 * `make lint` to lint the source code
 * `make salus` to check for security concerns
+* `make build` to build a Docker image from the remote repository
 * `make build-local` to build a Docker image from the local context
 * `make coverage-local` to generate a coverage report
 
 ## License
 This project is available open source under the terms of the [Apache 2.0 License](https://opensource.org/licenses/Apache-2.0).
-
-© 2020 Coinbase
