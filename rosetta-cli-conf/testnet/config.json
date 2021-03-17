@@ -35,7 +35,7 @@
     "block_broadcast_limit": 1,
     "rebroadcast_all": true,
     "end_conditions": {
-      "transfer": 1
+      "transfer": 10
     },
     "prefunded_accounts": [
       {
