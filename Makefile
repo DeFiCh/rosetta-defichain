@@ -111,14 +111,22 @@ mocks:
 # Detailed fix description may be found here:
 # 	- https://github.com/coinbase/rosetta-cli/issues/222
 #  
-check-data-api: check-testnet-rosetta-cli-configuration
+check-mainnet-data-api: check-mainnet-rosetta-cli-configuration
+	rosetta-cli check:data --configuration-file ${CLI_MAINNET_CONFIG_PATH}
+
+check-testnet-data-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:data --configuration-file ${CLI_TESTNET_CONFIG_PATH}
 
-check-construction-api: check-testnet-rosetta-cli-configuration
+check-testnet-construction-api: check-testnet-rosetta-cli-configuration
 	rosetta-cli check:construction --configuration-file ${CLI_TESTNET_CONFIG_PATH}
 
 # NOTE: may be provided as an environment variable
 CLI_TESTNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/testnet/config.json
+CLI_MAINNET_CONFIG_PATH = `pwd`/rosetta-cli-conf/mainnet/config.json
 
 check-testnet-rosetta-cli-configuration:
 	rosetta-cli configuration:validate ${CLI_TESTNET_CONFIG_PATH}
+
+check-mainnet-rosetta-cli-configuration:
+	rosetta-cli configuration:validate ${CLI_MAINNET_CONFIG_PATH}
+
