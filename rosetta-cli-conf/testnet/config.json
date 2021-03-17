@@ -4,15 +4,15 @@
     "network": "testnet"
   },
   "online_url": "http://localhost:8080",
-  "http_timeout": 300,
-  "seen_block_workers": 60,
-  "serial_block_workers": 10,
+  "http_timeout": 10,
+  "seen_block_workers": 30,
+  "serial_block_workers": 30,
   "max_sync_concurrency": 30,
-  "max_online_connections": 20,
+  "max_online_connections": 30,
   "max_retries": 10,
   "memory_limit_disabled": true,
   "compression_disabled": true,
-  "tip_delay": 9999999,
+  "tip_delay": 1800,
   "data_directory": "./cli-data",
 
   "data": {
