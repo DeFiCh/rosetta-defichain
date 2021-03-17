@@ -49,8 +49,7 @@ make build-local
 ### Run
 Running the following commands will start a Docker container in
 [detached mode](https://docs.docker.com/engine/reference/run/#detached--d) with
-a data directory at `<working directory>/defichain-data` and the Rosetta API accessible
-at port `8080`.
+a data directory at `<working directory>/data` and the Rosetta API accessible.
 
 #### Mainnet:Online
 ```text
