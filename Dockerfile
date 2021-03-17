@@ -57,15 +57,13 @@ ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-# TODO: update checkout to be a specific commit hash
-RUN cd .. \
-  && git clone https://github.com/DeFiCh/rosetta-defichain.git \
-  && cd rosetta-defichain \ 
-  && git checkout master \ 
+RUN git clone https://github.com/DeFiCh/rosetta-defichain.git src \
+  && cd src \ 
+  && git checkout defi-node \ 
   && go build -o /app/rosetta-defichain main.go \
-  && mv rosetta-defichain/assets/* /app \
-  && cd .. \
-  && rm -rf rosetta-defichain
+  && mv assets/* /app \
+  && cd .. \ 
+  && rm -rf src
 
 ## Build Final Image
 FROM ubuntu:18.04
@@ -84,7 +82,7 @@ WORKDIR /app
 # Copy binary from defid-builder
 COPY --from=defid-builder /app/defid /app/defid
 
-# Copy binary from rosetta-builder
+# Copy binary and configuration files from rosetta-builder
 COPY --from=rosetta-builder /app/* /app/
 
 # Set permissions for everything added to /app
