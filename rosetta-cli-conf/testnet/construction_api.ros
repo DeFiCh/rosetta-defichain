@@ -1,0 +1,248 @@
+// NOTE: DeFiChain doesn't provide a faucet or a way with a similar to a faucet functionality,
+// that is why we don't have to implement `create_account` reserved workflow, rather we heve 
+// to provide already prefunded account via configuration file. However account creation is
+// implemented inside of the `transfer` workflow
+//
+// [!] THIS SCRIPT WORKS UNTIL A PROVIDED PREFUNDED ACCOUNT HAS ENOUGH ASSETS. AFTER EACH 
+//     SCRIPT EXECUTION ACCOUNT FUNDS ARE BEING DECREASED BY SUGGESTED FEE AMOUNT. RIGHT 
+//     AFTER AMOUNT WILL BE DECREASED AND BE NEAR ABOUT ZERO, ACCOUNT MUST BE FUNDED 
+//     MANUALLY AGAIN OR REPLACED WITH ANOTHER PREFUNDED ACCOUNT AT USED CONFIGURATION 
+//     FILE
+//
+// [!] THIS SCRIPT DOESN'T WORK WITH ROSETTA-CLI OF 0.6.7 AND ANY OTHER VERSIONS BELOW, 
+//     AS MENTIONED HERE: 
+//          - https://github.com/coinbase/rosetta-cli/issues/222
+//
+//     FOR EXECUTION OF THIS SCRIPT, PLEASE, USE ROSETTA-CLI INSTALLED FROM THE FOLLOWING 
+//     SOURCE WITH FIX APPLIED:
+//          - https://github.com/DeFiDev/rosetta-cli/tree/v0.6.7-1
+
+transfer(1){
+    init_shared_vars{
+        network  = {"network":"testnet", "blockchain":"defichain"};
+        currency = {"symbol":"tDFI", "decimals":8};
+    },
+
+    load_sending_account{
+        sending_account = find_balance({
+            "minimum_balance":{
+                "value"   : "1",  
+                "currency": {{currency}}
+            },
+            "require_coin": true
+        });
+
+        print_message({"loaded_sender_account": {{sending_account}}});
+    },
+
+    create_receiving_account{
+        receiving_account_keys = generate_key({"curve_type": "secp256k1"});
+
+        receiving_account = derive({
+            "network_identifier": {{network}},
+            "public_key"        : {{receiving_account_keys.public_key}}
+        });
+
+        // NOTE: we must save newly created account (receiving) within a rosetta-cli too,
+        // in order to return received funds to a sending account at `return_funds` 
+        // reserved workflow. Otherwise received funds may become locked for forever
+        save_account({
+            "account_identifier": {{receiving_account.account_identifier}},
+            "keypair"           : {{receiving_account_keys}}
+        });
+        
+        print_message({"created_receiving_account": {{receiving_account}}});
+    },
+
+    broadcast_dry{
+        // In order to broadcast transaction we have to populate special fields of the
+        // scenario. All required by Rosetta API specification requests will be 
+        // executed in a predefined by flow under the hood, right after this scenario 
+        // comes to an end
+        //
+        // However we set `dry_run` parameter to `true` value now. It means, that 
+        // built transaction will not be submitted. This is done to acquire
+        // `broadcast_dry.suggested_fee`, which will be accessible after 
+        // `broadcast_dry` finishes, so we can use this value to subtract from 
+        // sending amount in a final transaction
+        broadcast_dry.dry_run = true;
+
+        broadcast_dry.network            = {{network}};
+        broadcast_dry.confirmation_depth = 6;
+
+        // We must convert amount to be negative for an INPUT operation.
+        // We do this `math` operation here, because direct evaluation 
+        // at []operations below is not recognizable by parser
+        sending_amount   = 0 - {{sending_account.balance.value}};
+
+        broadcast_dry.operations = [
+            {
+                "operation_identifier": {
+                    "index": 0
+                },
+                "type": "INPUT",
+                "account": {{sending_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                },
+                "coin_change": {
+                    "coin_identifier": {{sending_account.coin}}, 
+                    "coin_action": "coin_spent"
+                }
+            },
+            {
+                "operation_identifier": {
+                    "index": 1
+                },
+                "type": "OUTPUT",
+                "account": {{receiving_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                }
+            }
+        ];
+    },
+
+    broadcast{
+        broadcast.network            = {{network}};
+        broadcast.confirmation_depth = 6;
+
+        sending_amount   = 0 - {{sending_account.balance.value}};
+
+        // Subtract acquired `suggested_fee` from sending amount
+        receiving_amount = {{sending_account.balance.value}} - {{broadcast_dry.suggested_fee.0.value}};
+        assert({{receiving_amount}});
+
+        broadcast.operations = [
+            {
+                "operation_identifier": {
+                    "index": 0
+                },
+                "type": "INPUT",
+                "account": {{sending_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                },
+                "coin_change": {
+                    "coin_identifier": {{sending_account.coin}}, 
+                    "coin_action": "coin_spent"
+                }
+            },
+            {
+                "operation_identifier": {
+                    "index": 1
+                },
+                "type": "OUTPUT",
+                "account": {{receiving_account.account_identifier}},
+                "amount": {
+                    "value": {{receiving_amount}},
+                    "currency": {{currency}}
+                }
+            }
+        ];
+
+        set_blob({"key": "sending_account", "value": {{sending_account}}});
+        set_blob({"key": "receiving_account", "value": {{receiving_account}}});
+    }
+}
+
+return_funds(1){
+    init_shared_vars{
+        network  = {"network":"testnet", "blockchain":"defichain"};
+        currency = {"symbol":"tDFI", "decimals":8};
+    },
+
+    load_accounts{
+        receiving_account_id = get_blob({"key": "receiving_account"});
+        receiving_account    = find_balance({
+            "minimum_balance":{
+                "value"   : "1",  
+                "currency": {{currency}}
+            },
+            "account_identifier": {{receiving_account_id.account_identifier}},
+            "require_coin": true
+        });
+        sending_account = get_blob({"key": "sending_account"});
+
+        print_message({"loaded receiving_account (sender)": {{receiving_account}}});
+        print_message({"loaded sending_account (receiver)": {{sending_account}}});
+    },
+
+    broadcast_dry{
+        broadcast_dry.dry_run            = true;
+        broadcast_dry.network            = {{network}};
+        broadcast_dry.confirmation_depth = 1; 
+
+        sending_amount   = 0 - {{receiving_account.balance.value}};
+
+        broadcast_dry.operations = [
+            {
+                "operation_identifier": {
+                    "index": 0
+                },
+                "type": "INPUT",
+                "account": {{receiving_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                },
+                "coin_change": {
+                    "coin_identifier": {{receiving_account.coin}}, 
+                    "coin_action": "coin_spent"
+                }
+            },
+            {
+                "operation_identifier": {
+                    "index": 1
+                },
+                "type": "OUTPUT",
+                "account": {{sending_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                }
+            }
+        ];
+    },
+
+    broadcast{
+        broadcast.network            = {{network}};
+        broadcast.confirmation_depth = 1;
+
+        sending_amount   = 0 - {{receiving_account.balance.value}};
+        receiving_amount = {{receiving_account.balance.value}} - {{broadcast_dry.suggested_fee.0.value}};
+        assert({{receiving_amount}});
+
+        broadcast.operations = [
+            {
+                "operation_identifier": {
+                    "index": 0
+                },
+                "type": "INPUT",
+                "account": {{receiving_account.account_identifier}},
+                "amount": {
+                    "value": {{sending_amount}},
+                    "currency": {{currency}}
+                },
+                "coin_change": {
+                    "coin_identifier": {{receiving_account.coin}}, 
+                    "coin_action": "coin_spent"
+                }
+            },
+            {
+                "operation_identifier": {
+                    "index": 1
+                },
+                "type": "OUTPUT",
+                "account": {{sending_account.account_identifier}},
+                "amount": {
+                    "value": {{receiving_amount}},
+                    "currency": {{currency}}
+                }
+            }
+        ];
+    }
+}
