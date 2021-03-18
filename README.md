@@ -33,18 +33,19 @@ DOCKER [HERE](https://www.docker.com/get-started).**
 ### Install
 Running the following commands will create a Docker image called `rosetta-defichain:latest`.
 
-#### From GitHub
-To download the pre-built Docker image from the latest release, run:
-```text
-curl -sSfL https://raw.githubusercontent.com/DeFiCh/rosetta-defichain/master/install.sh | sh -s
-```
-_Do not try to install rosetta-defichain using GitHub Packages!_
-
 #### From Source
 After cloning this repository, run:
 ```text
 make build-local
 ```
+
+#### Docker
+You also may build your docker image by invoking the following command:
+```text
+docker build -t rosetta-defichain:latest https://github.com/DeFiCh/rosetta-defichain.git
+```
+
+If you want to build a certain version of the image, you may add tag, branch and other supported references to the end of the command above. On how to to this, please, see this [details](https://docs.docker.com/engine/reference/commandline/build/#git-repositories)
 
 ### Run
 Running the following commands will start a Docker container in
