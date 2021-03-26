@@ -23,10 +23,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y make gcc g++ autoconf autotools-dev bsdmainutils build-essential git libboost-all-dev \
   libcurl4-openssl-dev libdb++-dev libevent-dev libssl-dev libtool pkg-config python python-pip libzmq3-dev wget
 
-# VERSION: DeFiChain 1.5.1
+# VERSION: DeFiChain 1.6.0
 RUN git clone  https://github.com/DeFiCh/ain \
   && cd ain \
-  && git checkout 5bb08f5f750eed8ff3927c44889ed3031ae96d60
+  && git checkout cfdda817fdb5fdddbd56505d5f20c1f17557478e
 
 RUN cd ain \
   && ./autogen.sh \
