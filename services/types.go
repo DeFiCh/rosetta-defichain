@@ -24,7 +24,7 @@ import (
 const (
 	// NodeVersion is the version of
 	// DeFiChain we are using.
-	NodeVersion = "1.5.1"
+	NodeVersion = "1.6.0"
 
 	// HistoricalBalanceLookup indicates
 	// that historical balance lookup is supported.
