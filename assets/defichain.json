@@ -1,6 +1,6 @@
 {
  "network": {
-  "blockchain": "Bitcoin",
+  "blockchain": "Defichain",
   "network": "Mainnet"
  },
  "online_url": "http://localhost:8080",

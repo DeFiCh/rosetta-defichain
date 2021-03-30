@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bitcoin
+package defichain
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"time"
 
-	bitcoinUtils "github.com/coinbase/rosetta-bitcoin/utils"
+	defichainUtils "github.com/DeFiCh/rosetta-defichain/utils"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -35,7 +35,7 @@ import (
 
 const (
 	// genesisBlockIndex is the height of the block we consider to be the
-	// genesis block of the bitcoin blockchain for polling
+	// genesis block of the DeFiChain blockchain for polling
 	genesisBlockIndex = 0
 
 	// requestID is the JSON-RPC request ID we use for making requests.
@@ -89,11 +89,11 @@ const (
 	dialTimeout    = 5 * time.Second
 
 	// timeMultiplier is used to multiply the time
-	// returned in Bitcoin blocks to be milliseconds.
+	// returned in DeFiChain blocks to be milliseconds.
 	timeMultiplier = 1000
 
-	// rpc credentials are fixed in rosetta-bitcoin
-	// because we never expose access to the raw bitcoind
+	// rpc credentials are fixed in rosetta-defichain
+	// because we never expose access to the raw defid
 	// endpoints (that could be used perform an attack, like
 	// changing our peers).
 	rpcUsername = "rosetta"
@@ -109,10 +109,10 @@ var (
 	ErrJSONRPCError = errors.New("JSON-RPC error")
 )
 
-// Client is used to fetch blocks from bitcoind and
-// to parse Bitcoin block data into Rosetta types.
+// Client is used to fetch blocks from defid and
+// to parse DeFiChain block data into Rosetta types.
 //
-// We opted not to use existing Bitcoin RPC libraries
+// We opted not to use existing DeFiChain RPC libraries
 // because they don't allow providing context
 // in each request.
 type Client struct {
@@ -130,7 +130,7 @@ func LocalhostURL(rpcPort int) string {
 	return fmt.Sprintf("http://localhost:%d", rpcPort)
 }
 
-// NewClient creates a new Bitcoin client.
+// NewClient creates a new DeFiChain client.
 func NewClient(
 	baseURL string,
 	genesisBlockIdentifier *types.BlockIdentifier,
@@ -160,8 +160,7 @@ func newHTTPClient(timeout time.Duration) *http.Client {
 	return httpClient
 }
 
-// NetworkStatus returns the *types.NetworkStatusResponse for
-// bitcoind.
+// NetworkStatus returns the *types.NetworkStatusResponse for defid.
 func (b *Client) NetworkStatus(ctx context.Context) (*types.NetworkStatusResponse, error) {
 	rawBlock, err := b.getBlock(ctx, nil)
 	if err != nil {
@@ -240,7 +239,7 @@ func (b *Client) GetRawBlock(
 	return block, coins, nil
 }
 
-// ParseBlock returns a parsed bitcoin block given a raw bitcoin
+//ParseBlock returns a parsed DeFiChain block given a raw DeFiChain
 // block and a map of transactions containing inputs.
 func (b *Client) ParseBlock(
 	ctx context.Context,
@@ -263,7 +262,7 @@ func (b *Client) ParseBlock(
 }
 
 // SendRawTransaction submits a serialized transaction
-// to bitcoind.
+// to defid.
 func (b *Client) SendRawTransaction(
 	ctx context.Context,
 	serializedTx string,
@@ -494,7 +493,7 @@ func (b *Client) parseTransactions(
 	block *Block,
 	coins map[string]*types.AccountCoin,
 ) ([]*types.Transaction, error) {
-	logger := bitcoinUtils.ExtractLogger(ctx, "client")
+	logger := defichainUtils.ExtractLogger(ctx, "client")
 
 	if block == nil {
 		return nil, errors.New("error parsing nil block")
@@ -627,7 +626,7 @@ func (b *Client) parseTxOperations(
 }
 
 // parseOutputTransactionOperation returns the types.Operation for the specified
-// `bitcoinOutput` transaction output.
+// `deFichainOutput` transaction output.
 func (b *Client) parseOutputTransactionOperation(
 	output *Output,
 	txHash string,
@@ -656,7 +655,7 @@ func (b *Client) parseOutputTransactionOperation(
 		CoinAction: types.CoinCreated,
 	}
 
-	// If we are unable to parse the output account (i.e. bitcoind
+	// If we are unable to parse the output account (i.e. defid
 	// returns a blank/nonstandard ScriptPubKey), we create an address as the
 	// concatenation of the tx hash and index.
 	//
@@ -767,7 +766,7 @@ func (b *Client) parseAmount(amount float64) (uint64, error) {
 	return uint64(atomicAmount), nil
 }
 
-// parseOutputAccount parses a bitcoinScriptPubKey and returns an account
+// parseOutputAccount parses a defichainScriptPubKey and returns an account
 // identifier. The account identifier's address corresponds to the first
 // address encoded in the script.
 func (b *Client) parseOutputAccount(
@@ -803,7 +802,7 @@ func (b *Client) coinbaseTxOperation(
 	}, nil
 }
 
-// post makes a HTTP request to a Bitcoin node
+// post makes an HTTP request to a DeFiChain node
 func (b *Client) post(
 	ctx context.Context,
 	method requestMethod,
