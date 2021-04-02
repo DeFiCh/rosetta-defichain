@@ -1,16 +1,24 @@
-Fixes # .
+<!--  Thanks for sending a pull request! -->
 
-### Motivation
-<!--
-Does this solve a bug? Enable a new use-case? Improve an existing behavior? Concrete examples are helpful here.
+#### What kind of PR is this?:
+<!-- Use one of the following kinds:
+/kind feature
+/kind fix
+/kind chore
+/kind docs
+/kind refactor
+/kind dependencies
 -->
 
-### Solution
-<!--
-What is the solution here from a high level. What are the key technical decisions and why were they made?
--->
+/kind
 
-### Open questions
+#### What this PR does / why we need it:
+
+#### Which issue(s) does this PR fixes?:
 <!--
-(optional) Any open questions or feedback on design desired?
+(Optional) Automatically closes linked issue when PR is merged.
+Usage: `Fixes #<issue number>`, or `Fixes (paste link of issue)`.
 -->
+Fixes #
+
+#### Additional comments?:

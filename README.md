@@ -1,18 +1,10 @@
-<p align="center">
-  <a href="https://www.rosetta-api.org">
-    <img width="90%" alt="Rosetta" src="https://www.rosetta-api.org/img/rosetta_header.png">
-  </a>
-</p>
-<h3 align="center">
-   Rosetta Bitcoin
-</h3>
-<p align="center">
-  <a href="https://circleci.com/gh/coinbase/rosetta-bitcoin/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-bitcoin/tree/master.svg?style=shield" /></a>
-  <a href="https://coveralls.io/github/coinbase/rosetta-bitcoin"><img src="https://coveralls.io/repos/github/coinbase/rosetta-bitcoin/badge.svg" /></a>
-  <a href="https://goreportcard.com/report/github.com/coinbase/rosetta-bitcoin"><img src="https://goreportcard.com/badge/github.com/coinbase/rosetta-bitcoin" /></a>
-  <a href="https://github.com/coinbase/rosetta-bitcoin/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/coinbase/rosetta-bitcoin.svg" /></a>
-  <a href="https://pkg.go.dev/github.com/coinbase/rosetta-bitcoin?tab=overview"><img src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=shield" /></a>
-</p>
+[![Go Report](https://goreportcard.com/badge/github.com/defich/rosetta-defichain)](https://goreportcard.com/report/github.com/defich/rosetta-defichain)
+
+- [ ] CI Badge
+- [ ] Coverage Badge
+- [ ] Maintainability Badge
+
+# Rosetta DeFi
 
 <p align="center"><b>
 ROSETTA-BITCOIN IS CONSIDERED <a href="https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha">ALPHA SOFTWARE</a>.
