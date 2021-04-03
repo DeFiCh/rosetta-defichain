@@ -71,8 +71,8 @@ check-format:
 test:
 	${TEST_SCRIPT}
 
-coverage:	
-	if [ "${COVERALLS_TOKEN}" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken ${COVERALLS_TOKEN}; fi
+coverage:
+	${TEST_SCRIPT} -coverprofile=c.out -covermode=count
 
 coverage-local:
 	${TEST_SCRIPT} -cover
