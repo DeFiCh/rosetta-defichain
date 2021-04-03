@@ -72,7 +72,7 @@ test:
 	${TEST_SCRIPT}
 
 coverage:
-	${TEST_SCRIPT} -coverprofile=c.out -covermode=count
+	${TEST_SCRIPT} -coverprofile=coverage.out -covermode=atomic
 
 coverage-local:
 	${TEST_SCRIPT} -cover
