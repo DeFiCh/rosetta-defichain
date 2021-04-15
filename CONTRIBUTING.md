@@ -40,14 +40,5 @@ The best way to see a feature added, however, is to submit a pull request.
 
 * Submit your pull request!
 
-## Support Requests
-
-For security reasons, any communication referencing support tickets for Coinbase
-products will be ignored. The request will have its content redacted and will
-be locked to prevent further discussion.
-
-All support requests must be made via [our support team][3].
-
-[1]: https://github.com/coinbase/rosetta-bitcoin/issues
+[1]: https://github.com/DeFiCh/rosetta-defichain/issues
 [2]: https://chris.beams.io/posts/git-commit/#seven-rules
-[3]: https://support.coinbase.com/customer/en/portal/articles/2288496-how-can-i-contact-coinbase-support-

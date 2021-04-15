@@ -86,6 +86,8 @@ type Client interface {
 		*defichain.Block,
 		map[string]*types.AccountCoin,
 	) (*types.Block, error)
+	GetTransaction(ctx context.Context, txid string) ([]byte, error)
+	GetRawTransaction(ctx context.Context, txid, blockhash string) (*defichain.Transaction, error)
 }
 
 var _ syncer.Handler = (*Indexer)(nil)

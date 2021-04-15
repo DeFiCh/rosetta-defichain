@@ -14,3 +14,5 @@ require (
 	golang.org/x/tools v0.0.0-20200904185747-39188db58858 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )
+
+replace github.com/btcsuite/btcd v0.21.0-beta => github.com/DeFiCh/dfid v0.21.1-beta

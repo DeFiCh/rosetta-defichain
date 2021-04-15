@@ -16,6 +16,7 @@ package services
 
 import (
 	"context"
+	"github.com/DeFiCh/rosetta-defichain/defichain"
 
 	"github.com/DeFiCh/rosetta-defichain/configuration"
 
@@ -73,5 +74,57 @@ func (s *MempoolAPIService) MempoolTransaction(
 		return nil, wrapErr(ErrUnavailableOffline, nil)
 	}
 
-	return nil, wrapErr(ErrUnimplemented, nil)
+	txHash := ""
+	if request != nil && request.TransactionIdentifier != nil {
+		txHash = request.TransactionIdentifier.Hash
+	}
+	if txHash == "" {
+		return nil, wrapErr(ErrTransactionNotFound, nil)
+	}
+
+	tx, err := s.client.GetRawTransaction(ctx, txHash, "")
+	if err != nil || tx == nil {
+		return nil, wrapErr(ErrTransactionNotFound, nil)
+	}
+
+	var (
+		inputsLen     = len(tx.Inputs)
+		operationsLen = inputsLen + len(tx.Outputs)
+
+		operations     = make([]*types.Operation, 0, operationsLen)
+		operationIndex int
+	)
+	for ; operationIndex < inputsLen; operationIndex++ {
+		operation := &types.Operation{
+			OperationIdentifier: &types.OperationIdentifier{
+				Index:        int64(operationIndex),
+				NetworkIndex: &tx.Inputs[operationIndex].Vout,
+			},
+			Type: defichain.InputOpType,
+		}
+		operations = append(operations, operation)
+	}
+	for ; operationIndex < operationsLen; operationIndex++ {
+		operation := &types.Operation{
+			OperationIdentifier: &types.OperationIdentifier{
+				Index: int64(operationIndex),
+			},
+			Type: defichain.OutputOpType,
+		}
+		operations = append(operations, operation)
+	}
+
+	resp := &types.MempoolTransactionResponse{
+		Transaction: &types.Transaction{
+			TransactionIdentifier: &types.TransactionIdentifier{
+				Hash: tx.Hash,
+			},
+			Operations: operations,
+		},
+	}
+
+	metadata, _ := tx.Metadata()
+	resp.Metadata = metadata
+
+	return resp, nil
 }

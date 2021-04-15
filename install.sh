@@ -198,7 +198,7 @@ EOF
 
 BINARY=rosetta-defichain
 FORMAT=tar.gz
-OWNER=coinbase
+OWNER=DeFiCh
 REPO="rosetta-defichain"
 PREFIX="$OWNER/$REPO"
 

@@ -74,6 +74,12 @@ const (
 	// https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html
 	requestMethodSendRawTransaction requestMethod = "sendrawtransaction"
 
+	// https://developer.bitcoin.org/reference/rpc/getrawtransaction.html
+	requestMethodGetRawTransaction requestMethod = "getrawtransaction"
+
+	// https://developer.bitcoin.org/reference/rpc/gettransaction.html
+	requestMethodGetTransaction requestMethod = "gettransaction"
+
 	// https://developer.bitcoin.org/reference/rpc/estimatesmartfee.html
 	requestMethodEstimateSmartFee requestMethod = "estimatesmartfee"
 
@@ -275,6 +281,54 @@ func (b *Client) SendRawTransaction(
 	response := &sendRawTransactionResponse{}
 	if err := b.post(ctx, requestMethodSendRawTransaction, params, response); err != nil {
 		return "", fmt.Errorf("%w: error submitting raw transaction", err)
+	}
+
+	return response.Result, nil
+}
+
+// GetRawTransaction returns the raw transaction data
+func (b *Client) GetRawTransaction(
+	ctx context.Context,
+	txid, blockhash string,
+) (*Transaction, error) {
+	// Parameters:
+	//   1. txid
+	//   2. verbose (returns object if true)
+	//   3. blockhash (looks in mempool only if not provided)
+	resp := &Transaction{}
+	params := []interface{}{txid, true}
+	if blockhash != "" {
+		params = append(params, blockhash)
+	}
+
+	response := &getRawTransactionResponse{}
+	if err := b.post(ctx, requestMethodGetRawTransaction, params, response); err != nil {
+		return nil, fmt.Errorf("%w: error getting raw transaction", err)
+	}
+
+	if err := response.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(response.Result, &resp); err != nil {
+		return nil, fmt.Errorf("%w: error unmarshaling raw transaction", err)
+	}
+
+	return resp, nil
+}
+
+// GetTransaction returns the data about in-wallet transaction
+func (b *Client) GetTransaction(
+	ctx context.Context,
+	txid string,
+) ([]byte, error) {
+	// Parameters:
+	//   1. txid
+	params := []interface{}{txid}
+
+	response := &getTransactionResponse{}
+	if err := b.post(ctx, requestMethodGetTransaction, params, response); err != nil {
+		return nil, fmt.Errorf("%w: error submitting raw transaction", err)
 	}
 
 	return response.Result, nil
@@ -568,7 +622,7 @@ func (b *Client) parseTxOperations(
 	txOps := []*types.Operation{}
 
 	for networkIndex, input := range tx.Inputs {
-		if bitcoinIsCoinbaseInput(input, txIndex, networkIndex) {
+		if defichainIsCoinbaseInput(input, txIndex, networkIndex) {
 			txOp, err := b.coinbaseTxOperation(input, int64(len(txOps)), int64(networkIndex))
 			if err != nil {
 				return nil, err
@@ -697,7 +751,7 @@ func (b *Client) getInputTxHash(
 	txIndex int,
 	inputIndex int,
 ) (string, int64, bool) {
-	if bitcoinIsCoinbaseInput(input, txIndex, inputIndex) {
+	if defichainIsCoinbaseInput(input, txIndex, inputIndex) {
 		return "", -1, false
 	}
 
@@ -707,8 +761,8 @@ func (b *Client) getInputTxHash(
 // bitcoinIsCoinbaseInput returns whether the specified input is
 // the coinbase input. The coinbase input is always the first input in the first
 // transaction, and does not contain a previous transaction hash.
-func bitcoinIsCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
-	return txIndex == 0 && inputIndex == 0 && input.TxHash == "" && input.Coinbase != ""
+func defichainIsCoinbaseInput(input *Input, txIndex int, inputIndex int) bool {
+	return inputIndex == 0 && input.TxHash == ""
 }
 
 // parseInputTransactionOperation returns the types.Operation for the specified

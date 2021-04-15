@@ -15,6 +15,7 @@ TEST_SCRIPT=go test ${GO_PACKAGES}
 LINT_SETTINGS=golint,misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
 PWD=$(shell pwd)
 NOFILE=100000
+CONTAINER_NAME = rosetta-defichain
 
 deps:
 	go get ./...
@@ -31,16 +32,16 @@ build-release:
 	docker save rosetta-defichain:$(version) | gzip > rosetta-defichain-$(version).tar.gz;
 
 run-mainnet-online:
-	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/defichain-data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 8333:8333 rosetta-defichain:latest
+	docker run -d --name ${CONTAINER_NAME} --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/defichain-data:/data" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -p 8080:8080 -p 8554:8554 rosetta-defichain:latest
 
 run-mainnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
 
 run-testnet-online:
-	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/defichain-data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 18333:18333 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} --ulimit "nofile=${NOFILE}:${NOFILE}" -v "${PWD}/defichain-data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 18554:18554 rosetta-defichain:latest
 
 run-testnet-offline:
-	docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
+	docker run -d --rm --name ${CONTAINER_NAME} -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081:8081 rosetta-defichain:latest
 
 train:
 	./zstd-train.sh $(network) transaction $(data-directory)
@@ -71,7 +72,7 @@ check-format:
 test:
 	${TEST_SCRIPT}
 
-coverage:	
+coverage:
 	if [ "${COVERALLS_TOKEN}" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken ${COVERALLS_TOKEN}; fi
 
 coverage-local:
